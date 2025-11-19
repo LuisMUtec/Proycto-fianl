@@ -1,0 +1,4 @@
+# Kitchen Service - Menu Management Functions
+# POST /menu/items
+# PUT /menu/items/{itemId}
+# PUT /menu/items/{itemId}/availability

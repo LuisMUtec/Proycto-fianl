@@ -1,0 +1,4 @@
+# Admin Service - Dashboard Functions
+# GET /admin/dashboard
+# GET /admin/orders/today
+# GET /admin/kitchen/metrics

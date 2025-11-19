@@ -1,0 +1,29 @@
+# Serverless Framework Configuration - Delivery Service
+# Responsable: Persona 3
+
+service: fridays-delivery-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+functions:
+  # Delivery Functions
+  # POST /delivery/orders/{orderId}/assign
+  # PUT /delivery/orders/{orderId}/status
+  # GET /delivery/drivers/available
+  
+  # Drivers Functions
+  # POST /delivery/drivers
+  # GET /delivery/drivers
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3003

@@ -1,0 +1,5 @@
+# Kitchen Service - Kitchen Functions
+# POST /kitchen/orders/{orderId}/assign
+# PUT /kitchen/orders/{orderId}/items/{itemId}
+# GET /kitchen/orders/pending
+# POST /kitchen/orders/{orderId}/ready

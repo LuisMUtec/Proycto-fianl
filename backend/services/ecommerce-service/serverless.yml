@@ -1,0 +1,40 @@
+# Serverless Framework Configuration - E-commerce Service
+# Responsable: Persona 1
+
+service: fridays-ecommerce-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+functions:
+  # Menu Functions
+  # GET /menu
+  # GET /menu/{category}
+  
+  # Auth Functions (Cliente)
+  # POST /auth/register
+  # POST /auth/login
+  
+  # Cart Functions
+  # POST /cart/add
+  # GET /cart
+  # PUT /cart/update
+  # DELETE /cart/remove/{itemId}
+  # POST /cart/clear
+  
+  # Orders Functions
+  # POST /orders
+  # GET /orders/{orderId}
+  # GET /users/orders
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001

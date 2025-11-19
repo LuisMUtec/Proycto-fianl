@@ -1,0 +1,32 @@
+# Serverless Framework Configuration - Admin Service
+# Responsable: Persona 3
+
+service: fridays-admin-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+functions:
+  # Dashboard Functions
+  # GET /admin/dashboard
+  # GET /admin/orders/today
+  # GET /admin/kitchen/metrics
+  
+  # Sedes Functions
+  # GET /admin/sedes
+  # POST /admin/sedes
+  
+  # Users Management Functions
+  # POST /admin/users (CRUD usuarios staff)
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3004

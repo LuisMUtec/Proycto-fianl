@@ -1,0 +1,34 @@
+# Serverless Framework Configuration - Kitchen Service
+# Responsable: Persona 2
+
+service: fridays-kitchen-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+functions:
+  # Kitchen Functions
+  # POST /kitchen/orders/{orderId}/assign
+  # PUT /kitchen/orders/{orderId}/items/{itemId}
+  # GET /kitchen/orders/pending
+  # POST /kitchen/orders/{orderId}/ready
+  
+  # Menu Management Functions (Admin)
+  # POST /menu/items
+  # PUT /menu/items/{itemId}
+  # PUT /menu/items/{itemId}/availability
+  
+  # Auth Staff Functions
+  # Authentication logic for staff members
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3002

@@ -1,0 +1,16 @@
+{
+  "name": "fridays-kitchen-service",
+  "version": "1.0.0",
+  "description": "Kitchen Service - Persona 2",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Persona 2",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-offline": "^13.0.0"
+  }
+}

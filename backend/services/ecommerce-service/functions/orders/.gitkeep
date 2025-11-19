@@ -1,0 +1,4 @@
+# E-commerce Service - Orders Functions
+# POST /orders
+# GET /orders/{orderId}
+# GET /users/orders

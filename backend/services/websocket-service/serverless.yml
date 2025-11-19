@@ -1,0 +1,28 @@
+# Serverless Framework Configuration - WebSocket Service
+# Notificaciones en tiempo real
+
+service: fridays-websocket-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  
+functions:
+  # Connection Functions
+  # $connect
+  # $disconnect
+  # $default
+  
+  # Notifications Functions
+  # Send notifications to clients
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3005

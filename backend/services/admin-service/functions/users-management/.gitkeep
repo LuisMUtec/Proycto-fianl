@@ -1,0 +1,3 @@
+# Admin Service - Users Management Functions
+# POST /admin/users
+# CRUD completo de usuarios staff
