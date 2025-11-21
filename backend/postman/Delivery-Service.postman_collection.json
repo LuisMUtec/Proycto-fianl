@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "delivery-service-001",
+		"name": "Fridays - Delivery Service",
+		"description": "Colección de endpoints para el servicio de delivery (repartidores y seguimiento de órdenes)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Drivers",
+			"item": [
+				{
+					"name": "List All Drivers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/drivers",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"drivers"
+							]
+						},
+						"description": "Obtiene la lista de todos los repartidores (activos e inactivos)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Drivers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/drivers/available",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"drivers",
+								"available"
+							]
+						},
+						"description": "Obtiene solo los repartidores disponibles para asignación"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Driver",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tenantId\": \"TENANT#001\",\n  \"firstName\": \"Pedro\",\n  \"lastName\": \"Ramirez\",\n  \"email\": \"pedro.repartidor@fridays.pe\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+51989012345\",\n  \"vehicleType\": \"MOTO\",\n  \"licensePlate\": \"ABC-123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/drivers",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"drivers"
+							]
+						},
+						"description": "Crea un nuevo repartidor en el sistema"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de repartidores"
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Assign Driver to Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"driverId\": \"{{driver_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/orders/:orderId/assign",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"orders",
+								":orderId",
+								"assign"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "ORDER#001"
+								}
+							]
+						},
+						"description": "Asigna un repartidor a una orden que está lista (READY). Solo ADMIN_SEDE o REPARTIDOR pueden hacerlo."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"DELIVERING\",\n  \"location\": {\n    \"lat\": -12.046374,\n    \"lng\": -77.042793,\n    \"address\": \"En camino por Av. Javier Prado\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/orders/:orderId/status",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"orders",
+								":orderId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "ORDER#001"
+								}
+							]
+						},
+						"description": "Actualiza el estado de entrega de una orden. El repartidor asignado puede cambiar entre DELIVERING y DELIVERED."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Order as Delivered",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"DELIVERED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_delivery}}/api/delivery/orders/:orderId/status",
+							"host": [
+								"{{base_url_delivery}}"
+							],
+							"path": [
+								"api",
+								"delivery",
+								"orders",
+								":orderId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "orderId",
+									"value": "ORDER#001"
+								}
+							]
+						},
+						"description": "Marca la orden como entregada. Se registra la fecha/hora de entrega automáticamente."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de entregas de órdenes"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url_delivery",
+			"value": "http://localhost:3003/local",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "mock-token-for-local-dev",
+			"type": "string"
+		},
+		{
+			"key": "driver_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

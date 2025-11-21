@@ -1,28 +1,78 @@
-# Serverless Framework Configuration - Admin Service
-# Responsable: Persona 3
-
 service: fridays-admin-service
 
 frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  profile: ${opt:profile, 'fridays-dev'}
   
+  environment:
+    STAGE: ${self:provider.stage}
+    USERS_TABLE: Users-${self:provider.stage}
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    TENANTS_TABLE: Tenants-${self:provider.stage}
+    JWT_SECRET: fridays-secret-key-2025-proyectofinal
+  
+  # AWS Academy: Usar LabRole existente
+  iam:
+    role: arn:aws:iam::139051438271:role/LabRole
+
 functions:
-  # Dashboard Functions
-  # GET /admin/dashboard
-  # GET /admin/orders/today
-  # GET /admin/kitchen/metrics
-  
-  # Sedes Functions
-  # GET /admin/sedes
-  # POST /admin/sedes
-  
-  # Users Management Functions
-  # POST /admin/users (CRUD usuarios staff)
+  authorizer:
+    handler: ../../shared/auth/authorizer.handler
+
+  getDashboard:
+    handler: functions/dashboard/getDashboard.handler
+    events:
+      - http:
+          path: /api/admin/dashboard
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+
+  getOrdersToday:
+    handler: functions/orders/getOrdersToday.handler
+    events:
+      - http:
+          path: /api/admin/orders/today
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+
+  listSedes:
+    handler: functions/sedes/listSedes.handler
+    events:
+      - http:
+          path: /api/admin/sedes
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+
+  createUser:
+    handler: functions/users/createUser.handler
+    events:
+      - http:
+          path: /api/admin/users
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+
+  listUsers:
+    handler: functions/users/listUsers.handler
+    events:
+      - http:
+          path: /api/admin/users
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
 
 plugins:
   - serverless-offline
@@ -30,3 +80,4 @@ plugins:
 custom:
   serverless-offline:
     httpPort: 3004
+    stage: local

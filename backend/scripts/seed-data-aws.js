@@ -1,13 +1,14 @@
-// Script para poblar datos de prueba en DynamoDB local
+// Script para poblar datos de prueba en DynamoDB AWS
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid');
 
-const dynamodb = new AWS.DynamoDB.DocumentClient({
-  region: 'us-east-1',
-  endpoint: 'http://localhost:8000',
-  accessKeyId: 'dummy',
-  secretAccessKey: 'dummy'
-});
+// Configurar AWS con el perfil fridays-dev
+const credentials = new AWS.SharedIniFileCredentials({ profile: 'fridays-dev' });
+AWS.config.credentials = credentials;
+AWS.config.region = 'us-east-1';
+
+const dynamodb = new AWS.DynamoDB.DocumentClient();
+const stage = process.env.STAGE || 'dev';
 
 const seedData = {
   // Sedes
@@ -48,7 +49,7 @@ const seedData = {
       firstName: 'Leonardo',
       lastName: 'Sanchez',
       email: 'leonardo@gmail.com',
-      passwordHash: '$2b$10$dummyHashForDev', // En producción: bcrypt real
+      passwordHash: '$2b$10$dummyHashForDev',
       phoneNumber: '+51912345678',
       status: 'ACTIVE',
       locationLat: -12.046374,
@@ -212,14 +213,14 @@ const seedData = {
 };
 
 async function seedDatabase() {
-  console.log('🌱 Seeding database with test data...\n');
+  console.log(`🌱 Seeding AWS DynamoDB (stage: ${stage})...\n`);
 
   try {
     // Insertar Tenants
     console.log('📍 Inserting Tenants...');
     for (const tenant of seedData.tenants) {
       await dynamodb.put({
-        TableName: 'Tenants-local',
+        TableName: `Tenants-${stage}`,
         Item: tenant
       }).promise();
       console.log(`  ✅ ${tenant.name}`);
@@ -229,7 +230,7 @@ async function seedDatabase() {
     console.log('\n👥 Inserting Users...');
     for (const user of seedData.users) {
       await dynamodb.put({
-        TableName: 'Users-local',
+        TableName: `Users-${stage}`,
         Item: user
       }).promise();
       console.log(`  ✅ ${user.firstName} ${user.lastName} (${user.role})`);
@@ -239,22 +240,25 @@ async function seedDatabase() {
     console.log('\n🍔 Inserting Products...');
     for (const product of seedData.products) {
       await dynamodb.put({
-        TableName: 'Products-local',
+        TableName: `Products-${stage}`,
         Item: product
       }).promise();
       console.log(`  ✅ ${product.name} - S/.${product.price}`);
     }
 
-    console.log('\n✨ Database seeded successfully!\n');
+    console.log('\n✨ AWS Database seeded successfully!\n');
     console.log('📊 Summary:');
     console.log(`  - Tenants: ${seedData.tenants.length}`);
     console.log(`  - Users: ${seedData.users.length}`);
     console.log(`  - Products: ${seedData.products.length}`);
-    console.log('\n🔐 Test Credentials:');
-    console.log('  - Cliente: leonardo@gmail.com / password123');
-    console.log('  - Cocinero: carlos.cook@fridays.pe / password123');
-    console.log('  - Repartidor: maria.dispatcher@fridays.pe / password123');
-    console.log('  - Admin: admin@fridays.pe / password123');
+    console.log('\n🔐 Test Credentials (use estos emails para generar JWT):');
+    console.log('  - Cliente: leonardo@gmail.com');
+    console.log('  - Digitador: ana.digitador@fridays.pe');
+    console.log('  - Chef Ejecutivo: carlos.chef@fridays.pe');
+    console.log('  - Cocinero: luis.cocinero@fridays.pe');
+    console.log('  - Empacador: jose.empacador@fridays.pe');
+    console.log('  - Repartidor: maria.repartidor@fridays.pe');
+    console.log('  - Admin Sede: admin@fridays.pe');
 
   } catch (error) {
     console.error('❌ Error seeding database:', error);

@@ -1,15 +1,20 @@
 {
   "name": "fridays-delivery-service",
   "version": "1.0.0",
-  "description": "Delivery Service - Persona 3",
+  "description": "Delivery Service - Fridays Perú",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "serverless offline start --stage local",
+    "deploy": "serverless deploy --stage dev --aws-profile fridays-dev",
+    "logs": "serverless logs --stage dev --aws-profile fridays-dev --tail",
+    "remove": "serverless remove --stage dev --aws-profile fridays-dev"
   },
-  "keywords": [],
-  "author": "Persona 3",
-  "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.1492.0",
+    "uuid": "^9.0.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
   "devDependencies": {
     "serverless-offline": "^13.0.0"
   }

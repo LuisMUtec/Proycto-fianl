@@ -1,25 +1,77 @@
-# Serverless Framework Configuration - Delivery Service
-# Responsable: Persona 3
-
 service: fridays-delivery-service
 
 frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  profile: ${opt:profile, 'fridays-dev'}
   
+  environment:
+    STAGE: ${self:provider.stage}
+    USERS_TABLE: Users-${self:provider.stage}
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    JWT_SECRET: fridays-secret-key-2025-proyectofinal
+  
+  # AWS Academy: Usar LabRole existente en lugar de crear uno nuevo
+  iam:
+    role: arn:aws:iam::139051438271:role/LabRole
+
 functions:
-  # Delivery Functions
-  # POST /delivery/orders/{orderId}/assign
-  # PUT /delivery/orders/{orderId}/status
-  # GET /delivery/drivers/available
-  
-  # Drivers Functions
-  # POST /delivery/drivers
-  # GET /delivery/drivers
+  authorizer:
+    handler: ../../shared/auth/authorizer.handler
+
+  assignDriver:
+    handler: functions/orders/assignDriver.handler
+    events:
+      - http:
+          path: /api/delivery/orders/{orderId}/assign
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+
+  updateStatus:
+    handler: functions/orders/updateStatus.handler
+    events:
+      - http:
+          path: /api/delivery/orders/{orderId}/status
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+
+  getAvailable:
+    handler: functions/drivers/getAvailable.handler
+    events:
+      - http:
+          path: /api/delivery/drivers/available
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+
+  createDriver:
+    handler: functions/drivers/createDriver.handler
+    events:
+      - http:
+          path: /api/delivery/drivers
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+
+  listDrivers:
+    handler: functions/drivers/listDrivers.handler
+    events:
+      - http:
+          path: /api/delivery/drivers
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
 
 plugins:
   - serverless-offline
@@ -27,3 +79,4 @@ plugins:
 custom:
   serverless-offline:
     httpPort: 3003
+    stage: local
