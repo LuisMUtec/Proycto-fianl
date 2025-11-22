@@ -7,15 +7,15 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "https://YOUR_API_ID.execute-api.us-east-1.amazonaws.com/dev",
+      "value": "https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev",
       "type": "string",
-      "description": "⚠️ Actualiza esto después de 'serverless deploy'. Busca 'ServiceEndpoint' en el output"
+      "description": "✅ API Gateway endpoint - Ya configurado"
     },
     {
       "key": "ws_url",
-      "value": "wss://YOUR_WS_API_ID.execute-api.us-east-1.amazonaws.com/dev",
+      "value": "wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev",
       "type": "string",
-      "description": "⚠️ Actualiza esto después de 'serverless deploy'. Busca 'ServiceEndpointWebsocket' en el output"
+      "description": "✅ WebSocket endpoint - Ya configurado"
     },
     {
       "key": "tenant_id",
@@ -50,7 +50,7 @@
   ],
   "item": [
     {
-      "name": "0. Autenticación",
+      "name": "🔐 0. Autenticación",
       "item": [
         {
           "name": "Login - Cliente (USER)",
@@ -221,19 +221,20 @@
           "response": []
         },
         {
-          "name": "Registro de Usuario",
+          "name": "✨ Registro de Usuario Nuevo",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 201) {",
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('auth_token', response.token);",
                   "    pm.collectionVariables.set('user_id', response.user.userId);",
                   "    pm.test('Usuario registrado y token guardado', function() {",
                   "        pm.expect(response.token).to.exist;",
                   "        pm.expect(response.user.userId).to.exist;",
+                  "        pm.expect(response.user.role).to.equal('USER');",
                   "    });",
                   "}"
                 ],
@@ -251,31 +252,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"cliente@test.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"phoneNumber\": \"+51987654321\",\n  \"address\": \"Av. Principal 123, Lima\",\n  \"role\": \"USER\"\n}"
+              "raw": "{\n  \"email\": \"nuevo.cliente@test.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"phoneNumber\": \"+593987654321\",\n  \"address\": \"Av. Principal 123, Quito\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
               "host": ["{{base_url}}"],
               "path": ["auth", "register"]
             },
-            "description": "Registra un nuevo usuario en el sistema. Retorna un token JWT.\n\nRoles válidos:\n- USER: Cliente que hace pedidos\n- COOK: Cocinero\n- DISPATCHER: Empaquetador/Repartidor\n- ADMIN: Administrador de sede\n\nPara roles de staff (COOK, DISPATCHER, ADMIN) se debe incluir tenantId en el body."
+            "description": "📝 Registra un nuevo usuario en el sistema\n\n🔒 SEGURIDAD: El rol siempre es USER\nNo se puede especificar rol desde el cliente. Los roles administrativos (COOK, DISPATCHER, ADMIN) se crean desde el panel de administración o script de seed.\n\n✅ Campos requeridos:\n- email: Email único del usuario\n- password: Mínimo 6 caracteres\n- firstName: Nombre\n- lastName: Apellido\n\n📋 Campos opcionales:\n- phoneNumber: Teléfono de contacto\n- address: Dirección de entrega\n\n🎯 Retorna:\n- token: JWT para autenticación\n- user: Información del usuario creado (siempre con role: USER)"
           },
           "response": []
         },
         {
-          "name": "Registro de Staff (Admin)",
+          "name": "⚠️ [DEPRECATED] Registro de Staff",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    const response = pm.response.json();",
-                  "    pm.collectionVariables.set('auth_token', response.token);",
-                  "    pm.test('Admin registrado exitosamente', function() {",
-                  "        pm.expect(response.user.role).to.equal('ADMIN');",
-                  "    });",
-                  "}"
+                  "pm.test('Este endpoint está deprecado - usar script de seed o panel admin', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 403]);",
+                  "});"
                 ],
                 "type": "text/javascript"
               }
@@ -291,14 +288,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@fridays.com\",\n  \"password\": \"admin123\",\n  \"firstName\": \"Admin\",\n  \"lastName\": \"Fridays\",\n  \"phoneNumber\": \"+51912345678\",\n  \"role\": \"ADMIN\",\n  \"tenantId\": \"{{tenant_id}}\"\n}"
+              "raw": "{\n  \"email\": \"staff@fridays.com\",\n  \"password\": \"admin123\",\n  \"firstName\": \"Staff\",\n  \"lastName\": \"Member\",\n  \"phoneNumber\": \"+593912345678\",\n  \"role\": \"ADMIN\",\n  \"tenantId\": \"{{tenant_id}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
               "host": ["{{base_url}}"],
               "path": ["auth", "register"]
             },
-            "description": "Registra un usuario con rol ADMIN. Requiere tenantId."
+            "description": "⚠️ DEPRECADO: Este endpoint ya NO permite crear usuarios con roles administrativos.\n\n🔒 SEGURIDAD: El endpoint /auth/register siempre crea usuarios con rol USER.\n\n✅ Para crear usuarios staff usa:\n1. 📝 Script de seed: `python backend/scripts/seed-data.py --stage dev`\n2. 👔 Panel de administración (próximamente)\n3. 🗄️ Directamente en DynamoDB\n\n👥 Usuarios pre-configurados (password: todos123):\n- cliente@fridays.com (USER)\n- chef@fridays.com (COOK)\n- delivery@fridays.com (DISPATCHER)\n- admin@fridays.com (ADMIN)"
           },
           "response": []
         },
@@ -346,7 +343,7 @@
       ]
     },
     {
-      "name": "1. Productos (Menú)",
+      "name": "🍔 1. Productos (Menú)",
       "item": [
         {
           "name": "Listar Menú (Público)",
@@ -488,7 +485,7 @@
       ]
     },
     {
-      "name": "1. Order Workflow",
+      "name": "📦 2. Order Workflow",
       "item": [
         {
           "name": "Crear Orden (Step Functions)",
@@ -539,7 +536,7 @@
       ]
     },
     {
-      "name": "2. Update Order Status",
+      "name": "🔄 3. Update Order Status",
       "item": [
         {
           "name": "Actualizar a COOKING",
@@ -721,7 +718,7 @@
       ]
     },
     {
-      "name": "3. WebSocket Connection",
+      "name": "🌐 4. WebSocket Connection",
       "item": [
         {
           "name": "Conectar WebSocket (Usuario)",
@@ -780,7 +777,7 @@
       ]
     },
     {
-      "name": "4. Ejemplos de Respuestas WebSocket",
+      "name": "💬 5. Ejemplos de Respuestas WebSocket",
       "item": [
         {
           "name": "Ejemplo ORDER_CREATED",

@@ -1,6 +1,28 @@
 # 🍔 Fridays Backend - Sistema de Gestión de Órdenes
 
-Backend serverless para el sistema de gestión de órdenes de Fridays Perú, implementado con AWS Lambda, API Gateway, Step Functions, DynamoDB y EventBridge.
+Backend serverless para el sistema de gestión de órdenes de Fridays, implementado con AWS Lambda, API Gateway, Step Functions, DynamoDB y EventBridge.
+
+## 🚀 Deploy Rápido (3 pasos)
+
+```bash
+# 1️⃣ Instalar dependencias
+npm install
+
+# 2️⃣ Configurar serverless.yml
+# - org: TU_USUARIO (línea 1)
+# - role: arn:aws:iam::TU_ACCOUNT_ID:role/LabRole (línea 17)
+
+# 3️⃣ Crear JWT secret y desplegar
+aws ssm put-parameter --name "/fridays/jwt-secret" --value "$(openssl rand -base64 32)" --type "SecureString" --region us-east-1
+sls deploy --stage dev --region us-east-1
+
+# 4️⃣ Poblar base de datos
+python scripts/seed-data.py --stage dev --region us-east-1
+```
+
+✅ **¡Listo!** Tu API está funcionando.
+
+---
 
 ## 📋 Características
 
@@ -56,76 +78,159 @@ backend/
     └── dynamo_ws_connections.md
 ```
 
-## 🚀 Instalación
+## 🚀 Instalación y Despliegue Rápido
 
 ### Prerrequisitos
 
 - Node.js 18+ y npm
-- Python 3.11
-- AWS CLI configurado
+- Python 3.12+
+- AWS CLI configurado con credenciales
 - Cuenta de AWS Academy (o AWS regular)
-- Serverless Framework
+- Serverless Framework v4
+
+### ⚡ Quick Start (5 pasos)
+
+#### 1️⃣ Instalar Dependencias
+
+```bash
+cd backend
+npm install
+```
+
+#### 2️⃣ Configurar serverless.yml
+
+Abre `serverless.yml` y ajusta estos campos:
+
+```yaml
+# Línea 1: Tu organización de Serverless
+org: leonardogst  # 👈 CAMBIA ESTO por tu usuario
+
+# Línea 17: Tu AWS Account ID
+iam:
+  role: arn:aws:iam::085989816475:role/LabRole  # 👈 CAMBIA el número por tu Account ID
+```
+
+**📋 Obtener tu AWS Account ID:**
+```bash
+aws sts get-caller-identity --query Account --output text
+```
+
+**Resultado:** `085989816475` (ejemplo) → Reemplaza este número en el `serverless.yml`
+
+#### 3️⃣ Crear JWT Secret
+
+```bash
+# Generar y crear el secret en un solo comando
+aws ssm put-parameter \
+  --name "/fridays/jwt-secret" \
+  --value "$(openssl rand -base64 32)" \
+  --type "SecureString" \
+  --region us-east-1
+```
+
+#### 4️⃣ Desplegar a AWS
+
+```bash
+serverless deploy --stage dev --region us-east-1
+```
+
+**⏱️ Tiempo estimado:** 2-3 minutos
+
+**✅ Output esperado:**
+```
+endpoints:
+  POST - https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev/auth/register
+  POST - https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev/auth/login
+  ...
+  wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev
+
+functions:
+  authorizer: fridays-backend-dev-authorizer (165 kB)
+  authRegister: fridays-backend-dev-authRegister (165 kB)
+  ...
+
+layers:
+  pythonRequirements: arn:aws:lambda:us-east-1:085989816475:layer:fridays-backend-dev-python-requirements:3
+```
+
+**💾 Guarda estos endpoints:**
+- `base_url`: https://k6jm5wvb0h... (para Postman)
+- `ws_url`: wss://i1gzzaf7nf... (para WebSocket)
+
+#### 5️⃣ Poblar Base de Datos
+
+```bash
+python scripts/seed-data.py --stage dev --region us-east-1
+```
+
+**✅ Esto crea:**
+- 5 usuarios con roles (password: `todos123`)
+  - cliente@fridays.com (USER)
+  - chef@fridays.com (COOK)
+  - chef2@fridays.com (COOK)
+  - delivery@fridays.com (DISPATCHER)
+  - admin@fridays.com (ADMIN)
+- 10 productos del menú
+- 3 sedes (Quito, Guayaquil, Cuenca)
+
+---
+
+### 🎯 Resumen de Cambios Necesarios
+
+| Archivo | Campo | Qué Cambiar | Cómo Obtenerlo |
+|---------|-------|-------------|----------------|
+| `serverless.yml` (línea 1) | `org:` | Tu usuario de Serverless | Tu username |
+| `serverless.yml` (línea 17) | `role:` | AWS Account ID | `aws sts get-caller-identity` |
+| AWS Parameter Store | `/fridays/jwt-secret` | JWT secret | `openssl rand -base64 32` |
+
+### 🔧 Verificación Post-Deploy
+
+```bash
+# 1. Verificar que el stack se creó
+aws cloudformation describe-stacks \
+  --stack-name fridays-backend-dev \
+  --region us-east-1
+
+# 2. Verificar las tablas de DynamoDB
+aws dynamodb list-tables --region us-east-1 | grep fridays
+
+# 3. Probar el endpoint de registro
+curl -X POST https://TU_API_ID.execute-api.us-east-1.amazonaws.com/dev/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123456",
+    "firstName": "Test",
+    "lastName": "User"
+  }'
+
+# ✅ Respuesta esperada:
+# {
+#   "message": "Usuario registrado exitosamente",
+#   "user": { "userId": "...", "role": "USER", ... },
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+# }
+```
+
+---
+
+## 📦 Instalación Detallada (Opcional)
 
 ### Instalación de Dependencias
 
 ```bash
-# Instalar dependencias de Node.js
+# Instalar dependencias de Node.js (plugins de Serverless)
 npm install
 
-# Instalar Serverless Framework globalmente (si no lo tienes)
-npm install -g serverless
-
-# Instalar plugin de Step Functions
-npm install --save-dev serverless-step-functions
-
-# Instalar plugin de Python requirements
-npm install --save-dev serverless-python-requirements
+# 🔥 NOTA: Las dependencias de Python (PyJWT, boto3) se instalan automáticamente
+# durante el deploy mediante el sistema built-in de Serverless Framework v4
 ```
 
-### Configuración de JWT Secret
-
-**⚠️ IMPORTANTE**: Antes de desplegar, debes crear el JWT secret en AWS Systems Manager Parameter Store.
-
-#### Generar un Secret Seguro
-
-```bash
-# Linux/Mac - Generar secret aleatorio de 32 bytes
-openssl rand -base64 32
-
-# O con Python
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-#### Crear el Parámetro en AWS
-
-```bash
-# Reemplaza YOUR_SECRET_HERE con el secret generado
-aws ssm put-parameter \
-  --name "/fridays/jwt-secret" \
-  --value "YOUR_SECRET_HERE" \
-  --type "SecureString" \
-  --region us-east-1
-
-# Ejemplo:
-aws ssm put-parameter \
-  --name "/fridays/jwt-secret" \
-  --value "xK8mP3qR9wL2nF7tV5yU4hB6cD1gJ0sA" \
-  --type "SecureString" \
-  --region us-east-1
-```
-
-#### Verificar que se creó correctamente
-
-```bash
-aws ssm get-parameter \
-  --name "/fridays/jwt-secret" \
-  --with-decryption \
-  --region us-east-1
-```
+---
 
 ## 📦 Despliegue
 
-### Desplegar a AWS
+### Configuración Previa al Deploy
 
 ```bash
 # Desplegar en stage dev (por defecto)

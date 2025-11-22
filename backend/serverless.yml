@@ -1,15 +1,23 @@
+org: leonardogst  # 👈 REEMPLAZA CON TU ORGANIZACIÓN
 service: fridays-backend
 
-frameworkVersion: '3'
+frameworkVersion: '4'
 
 provider:
   name: aws
-  runtime: python3.11
+  runtime: python3.12
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
+  memorySize: 1024
+  timeout: 30
   
-  # Uso obligatorio del rol LabRole en AWS Academy
-  role: arn:aws:iam::${aws:accountId}:role/LabRole
+  # ⚠️ REEMPLAZA 123456789012 CON TU AWS ACCOUNT ID
+  # Para obtenerlo: aws sts get-caller-identity --query Account --output text
+  iam:
+    role: arn:aws:iam::085989816475:role/LabRole  # 👈 REEMPLAZA CON TU ACCOUNT ID
+  
+  layers:
+    - Ref: PythonRequirementsLambdaLayer
   
   environment:
     STAGE: ${self:provider.stage}
@@ -24,11 +32,13 @@ provider:
 
 plugins:
   - serverless-step-functions
-  - serverless-python-requirements
 
 custom:
   pythonRequirements:
-    dockerizePip: true
+    dockerizePip: false
+    slim: true
+    strip: false
+    pythonBin: python3
     layer: true
 
 functions:
@@ -38,7 +48,6 @@ functions:
   
   authorizer:
     handler: shared/auth/authorizer.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       JWT_SECRET_PARAM: ${self:provider.environment.JWT_SECRET_PARAM}
     description: "Valida tokens JWT para proteger endpoints"
@@ -49,7 +58,6 @@ functions:
   
   authRegister:
     handler: functions/auth/handler.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       USERS_TABLE: ${self:provider.environment.USERS_TABLE}
       JWT_SECRET_PARAM: ${self:provider.environment.JWT_SECRET_PARAM}
@@ -70,7 +78,6 @@ functions:
   
   productoService:
     handler: functions/producto-service/handler.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       PRODUCTS_TABLE: ${self:provider.environment.PRODUCTS_TABLE}
       S3_BUCKET: ${self:provider.environment.S3_BUCKET}
@@ -114,7 +121,6 @@ functions:
   
   prepareOrderData:
     handler: functions/order-workflow/prepare_order_data.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       PRODUCTS_TABLE: ${self:provider.environment.PRODUCTS_TABLE}
       USERS_TABLE: ${self:provider.environment.USERS_TABLE}
@@ -122,14 +128,12 @@ functions:
 
   persistAndBuildOrder:
     handler: functions/order-workflow/persist_and_build_order.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
     description: "Persiste la orden en DynamoDB"
 
   publishOrderCreatedEvent:
     handler: functions/order-workflow/publish_order_created_event.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       EVENT_BUS_NAME: ${self:provider.environment.EVENT_BUS_NAME}
     description: "Publica evento ORDER_CREATED en EventBridge"
@@ -140,7 +144,6 @@ functions:
   
   updateStatus:
     handler: functions/update-status/handler.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
       EVENT_BUS_NAME: ${self:provider.environment.EVENT_BUS_NAME}
@@ -160,7 +163,6 @@ functions:
   
   onConnect:
     handler: functions/websocket/on_connect.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
     description: "Registra conexión WebSocket en DynamoDB"
@@ -170,7 +172,6 @@ functions:
 
   onDisconnect:
     handler: functions/websocket/on_disconnect.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
     description: "Elimina conexión WebSocket de DynamoDB"
@@ -184,7 +185,6 @@ functions:
   
   orderEventsToWS:
     handler: functions/websocket/order_events_to_ws.handler
-    role: arn:aws:iam::${aws:accountId}:role/LabRole
     environment:
       WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
       WEBSOCKET_ENDPOINT: 
@@ -198,6 +198,26 @@ functions:
               - ORDER_CREATED
               - ORDER_STATUS_CHANGED
 
+  # ==========================================
+  # ORDER WORKFLOW TRIGGER - Lambda que invoca Step Function
+  # ==========================================
+  
+  createOrder:
+    handler: functions/order-workflow/create_order.handler
+    environment:
+      ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
+      STATE_MACHINE_ARN: 
+        Fn::GetAtt: [OrderWorkflowDashdev, Arn]
+    description: "Lambda que inicia el Step Function de órdenes"
+    events:
+      - http:
+          path: /orders
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+
 # ==========================================
 # STEP FUNCTIONS - Order Workflow
 # ==========================================
@@ -206,15 +226,7 @@ stepFunctions:
   stateMachines:
     orderWorkflow:
       name: orderWorkflow-${self:provider.stage}
-      roleArn: arn:aws:iam::${aws:accountId}:role/LabRole
-      events:
-        - http:
-            path: /orders
-            method: POST
-            cors: true
-            authorizer:
-              name: authorizer
-              resultTtlInSeconds: 300
+      role: arn:aws:iam::085989816475:role/LabRole
       definition:
         Comment: "Order creation workflow"
         StartAt: PrepareOrderData

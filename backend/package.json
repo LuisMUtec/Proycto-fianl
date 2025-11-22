@@ -21,8 +21,8 @@
   "author": "Fridays Peru",
   "license": "MIT",
   "devDependencies": {
-    "serverless": "^3.38.0",
-    "serverless-python-requirements": "^6.1.0",
+    "serverless": "^4.4.0",
+    "serverless-python-requirements": "^6.1.2",
     "serverless-step-functions": "^3.21.0"
   }
 }

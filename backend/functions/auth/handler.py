@@ -64,8 +64,11 @@ def register(event):
         last_name = body.get('lastName', '')
         phone_number = body.get('phoneNumber', '')
         address = body.get('address', '')
-        role = body.get('role', 'USER')  # Por defecto USER
-        tenant_id = body.get('tenantId')  # Opcional, solo para staff
+        
+        # SEGURIDAD: El rol siempre es USER para registro público
+        # Los roles administrativos (COOK, DISPATCHER, ADMIN) deben crearse desde el panel de administración
+        role = 'USER'
+        tenant_id = None  # Los usuarios normales no tienen tenantId
         
         # Validaciones
         if not email:
@@ -83,14 +86,6 @@ def register(event):
         if not first_name or not last_name:
             return build_response(400, {
                 'message': 'Nombre y apellido son requeridos',
-                'code': 'VALIDATION_ERROR'
-            })
-        
-        # Validar que el rol sea válido
-        valid_roles = ['USER', 'COOK', 'DISPATCHER', 'ADMIN']
-        if role not in valid_roles:
-            return build_response(400, {
-                'message': f'Rol inválido. Roles válidos: {", ".join(valid_roles)}',
                 'code': 'VALIDATION_ERROR'
             })
         
