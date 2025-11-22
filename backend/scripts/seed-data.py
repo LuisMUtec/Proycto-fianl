@@ -20,9 +20,9 @@ import argparse
 import sys
 
 # Configuración
-USERS_TABLE = "fridays-users-{stage}"
-PRODUCTS_TABLE = "fridays-products-{stage}"
-SEDES_TABLE = "fridays-sedes-{stage}"
+USERS_TABLE = "fridays-backend-users-{stage}"
+PRODUCTS_TABLE = "fridays-backend-products-{stage}"
+SEDES_TABLE = "fridays-backend-sedes-{stage}"
 
 def hash_password(password: str) -> str:
     """Hash password usando SHA-256"""
