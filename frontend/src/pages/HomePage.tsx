@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -38,29 +39,63 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div
-        className="relative h-[600px] bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg)',
-        }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="max-w-2xl text-white">
-            <h1 className="text-6xl font-bold mb-6 leading-tight">
-              Bienvenido a TGI Fridays
-            </h1>
-            <p className="text-xl mb-8 text-gray-200">
-              La mejor experiencia en comida americana. Hamburguesas legendarias,
-              alitas picantes y papas fritas ilimitadas te esperan.
-            </p>
-            <button
-              onClick={() => navigate('/menu')}
-              className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 flex items-center space-x-2"
-            >
-              <span>Ver Menú Completo</span>
-              <ChevronRight size={24} />
-            </button>
+      {/* Replaced single hero image with a 3x2 full-width grid of banners */}
+      <div className="w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Row 1 - Left (1) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/HOME_TACO_WEEK_Comprimido.jpg"
+              alt="Promo 1"
+              className="block w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+
+          </div>
+
+          {/* Row 1 - Right (2) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/RIBA_HOME_Comprimido.jpg"
+              alt="Promo 2"
+              className="block w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Row 2 - Left (3) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/RIBA_HOME_Comprimido.jpg"
+              alt="Promo 3"
+              className="block w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Row 2 - Right (4) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/RIBA_HOME_Comprimido.jpg"
+              alt="Promo 4"
+              className="block w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Row 3 - Left (5) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/Banner_Home_Mobile_Desktop.jpg"
+              alt="Promo 5"
+              className="block w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Row 3 - Right (6) */}
+          <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden">
+            <img
+              src="https://frdadmin21.fridaysperu.com/media/minibanner/Banner_Home_Mobile_Desktop.jpg"
+              alt="Promo 6"
+              className="block w-full h-full object-cover"
+            />
           </div>
         </div>
       </div>
@@ -105,20 +140,8 @@ export function HomePage() {
         </div>
       </div>
 
-      <div className="bg-black text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6">¿Listo para ordenar?</h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Realiza tu pedido ahora y recíbelo en la puerta de tu casa
-          </p>
-          <button
-            onClick={() => navigate('/menu')}
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105"
-          >
-            Hacer un Pedido
-          </button>
-        </div>
-      </div>
+      {/* Footer component */}
+      <Footer />
     </div>
   );
 }
