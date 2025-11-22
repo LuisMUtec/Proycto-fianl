@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Fridays - Sistema de Órdenes",
-    "description": "Colección de Postman para probar el flujo completo de órdenes con WebSocket y actualizaciones en tiempo real\n\n📋 USUARIOS PRE-CONFIGURADOS (Password: todos123):\n- cliente@fridays.com (USER)\n- chef@fridays.com (COOK)\n- delivery@fridays.com (DISPATCHER)\n- admin@fridays.com (ADMIN)\n\n🔧 CONFIGURACIÓN INICIAL:\n1. Después de 'serverless deploy', actualiza base_url y ws_url con tus endpoints\n2. Ejecuta el script de población: python backend/scripts/seed-data.py --stage dev\n3. Usa el request 'Login - Cliente' o cualquier otro para obtener el token\n4. El token se guarda automáticamente en {{auth_token}}\n\n🌐 WebSocket URL se obtiene del output de 'serverless deploy':\n   ServiceEndpointWebsocket: wss://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev",
+    "name": "🍔 Fridays - Sistema de Órdenes",
+    "description": "Colección de Postman para probar el flujo completo de órdenes\n\n📝 FLUJO RECOMENDADO:\n1️⃣ Autenticación → Login como Cliente\n2️⃣ Productos → Listar Menú (ver productos disponibles)\n3️⃣ Órdenes → Crear Orden con productos del menú\n4️⃣ WebSocket → Conectar para recibir notificaciones\n5️⃣ Login como Chef → Actualizar orden a COOKING\n6️⃣ Continuar flujo hasta DELIVERED\n\n👥 USUARIOS PRE-CONFIGURADOS (Password: todos123):\n- cliente@fridays.com (USER) - Para crear órdenes\n- chef@fridays.com (COOK) - Para cocinar\n- delivery@fridays.com (DISPATCHER) - Para entregar\n- admin@fridays.com (ADMIN) - Para gestionar menú\n\n🔗 ENDPOINTS:\n- API: https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev\n- WebSocket: wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev\n\n🎯 TenantId: sede-quito-001",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -45,13 +45,63 @@
       "key": "product_id",
       "value": "prod-001",
       "type": "string",
-      "description": "ProductId de ejemplo (Jack Daniel's Burger). Creado por el script de seed"
+      "description": "🍔 Jack Daniel's Burger - $12.99 (creado por el seed)"
+    },
+    {
+      "key": "product_id_2",
+      "value": "prod-005",
+      "type": "string",
+      "description": "🍹 Margarita Clásica - $7.50 (creado por el seed)"
     }
   ],
   "item": [
     {
       "name": "🔐 0. Autenticación",
       "item": [
+        {
+          "name": "🎯 START HERE - Login Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token);",
+                  "    pm.collectionVariables.set('user_id', response.user.userId);",
+                  "    console.log('✅ Token guardado:', response.token.substring(0, 20) + '...');",
+                  "    console.log('✅ User ID:', response.user.userId);",
+                  "    pm.test('✅ Login exitoso - Cliente autenticado', function() {",
+                  "        pm.expect(response.token).to.exist;",
+                  "        pm.expect(response.user.role).to.equal('USER');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@fridays.com\",\n  \"password\": \"todos123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "🎯 **EMPIEZA AQUÍ** - Login como cliente\n\n📝 FLUJO COMPLETO:\n1️⃣ **Ejecuta este request primero** (Login Cliente)\n2️⃣ Ir a Productos → Listar Menú\n3️⃣ Ir a Order Workflow → Crear Orden\n4️⃣ Ir a WebSocket → Conectar WebSocket\n5️⃣ Volver aquí → Login Chef\n6️⃣ Ir a Update Order Status → Actualizar a COOKING\n7️⃣ Continuar actualizando estados hasta DELIVERED\n\n👤 Credenciales de Cliente:\n- Email: cliente@fridays.com\n- Password: todos123\n- Role: USER\n- Nombre: Juan Cliente\n\n✨ Qué hace:\n- Valida credenciales\n- Genera token JWT (válido 7 días)\n- Guarda automáticamente en {{auth_token}}\n- Guarda userId en {{user_id}}\n\n🎯 Usa esta cuenta para:\n- ✅ Crear órdenes\n- ✅ Ver menú de productos\n- ✅ Recibir notificaciones WebSocket de tus pedidos"
+          },
+          "response": []
+        },
         {
           "name": "Login - Cliente (USER)",
           "event": [
@@ -522,14 +572,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod-001\",\n      \"quantity\": 2\n    },\n    {\n      \"productId\": \"prod-005\",\n      \"quantity\": 2\n    }\n  ],\n  \"notes\": \"Sin cebolla en la hamburguesa, por favor\",\n  \"paymentMethod\": \"CARD\"\n}"
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod-001\",\n      \"quantity\": 2,\n      \"notes\": \"Sin cebolla\"\n    },\n    {\n      \"productId\": \"prod-003\",\n      \"quantity\": 1,\n      \"notes\": \"Extra picante\"\n    },\n    {\n      \"productId\": \"prod-005\",\n      \"quantity\": 2\n    },\n    {\n      \"productId\": \"prod-006\",\n      \"quantity\": 1\n    }\n  ],\n  \"notes\": \"Para llevar. Incluir cubiertos y servilletas\",\n  \"paymentMethod\": \"CARD\",\n  \"deliveryAddress\": \"Av. Amazonas N21-147, Quito\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/orders",
               "host": ["{{base_url}}"],
               "path": ["orders"]
             },
-            "description": "Crea una nueva orden usando Step Functions. El workflow ejecuta:\n1. PrepareOrderData - Valida y enriquece items\n2. PersistAndBuildOrder - Guarda en DynamoDB\n3. PublishOrderCreatedEvent - Publica evento en EventBridge\n\n🔒 Endpoint protegido - Requiere token JWT (rol USER)\n\n📦 Productos de ejemplo en seed:\n- prod-001: Jack Daniel's Burger ($12.99)\n- prod-002: Costillas BBQ ($18.50)\n- prod-003: Alitas Picantes ($10.99)\n- prod-005: Margarita Clásica ($7.50)\n- prod-006: Limonada Natural ($3.50)\n\nNOTA: El userId y tenantId se extraen automáticamente del JWT token"
+            "description": "🍔 Crea una nueva orden usando Step Functions\n\n📋 FLUJO:\n1. PrepareOrderData - Valida y enriquece items con info de productos\n2. PersistAndBuildOrder - Guarda orden en DynamoDB\n3. PublishOrderCreatedEvent - Publica evento ORDER_CREATED en EventBridge\n4. WebSocket broadcast - Notifica a usuarios conectados\n\n🔒 Requiere: Token JWT (rol USER)\n📦 userId y tenantId: Se extraen automáticamente del token\n\n🍽️ PRODUCTOS DISPONIBLES (del seed):\n- prod-001: 🍔 Jack Daniel's Burger ($12.99)\n- prod-002: 🍖 Costillas BBQ ($18.50)\n- prod-003: 🍗 Alitas Picantes ($10.99)\n- prod-004: 🥗 Caesar Salad ($9.99)\n- prod-005: 🍹 Margarita Clásica ($7.50)\n- prod-006: 🍋 Limonada Natural ($3.50)\n- prod-007: 🍺 Cerveza Corona ($4.00)\n- prod-008: 🍰 Brownie con Helado ($6.99)\n- prod-009: 🍰 Cheesecake de Fresa ($5.99)\n- prod-010: 📦 Combo Familiar ($39.99)\n\n💰 TOTAL EJEMPLO: (2 × $12.99) + (2 × $7.50) = $40.98"
           },
           "response": []
         }
