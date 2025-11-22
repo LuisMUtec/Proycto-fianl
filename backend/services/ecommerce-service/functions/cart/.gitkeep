@@ -1,6 +1,0 @@
-# E-commerce Service - Cart Functions
-# POST /cart/add
-# GET /cart
-# PUT /cart/update
-# DELETE /cart/remove/{itemId}
-# POST /cart/clear
