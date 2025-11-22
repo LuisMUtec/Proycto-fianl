@@ -34,6 +34,10 @@ async function login(event) {
     }
 
     const user = result.Items[0];
+    // Compatibilidad: algunos items usan 'id' como PK en la tabla; asegurar que 'userId' esté presente
+    if (!user.userId && user.id) {
+      user.userId = user.id;
+    }
 
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {

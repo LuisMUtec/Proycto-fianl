@@ -61,7 +61,8 @@ async function checkout(event) {
     // Obtener información del usuario
     const userResult = await dynamodb.get({
       TableName: USERS_TABLE,
-      Key: { userId }
+      // La tabla actual usa 'id' como clave primaria; usar id = userId
+      Key: { id: userId }
     }).promise();
 
     const user = userResult.Item || {};

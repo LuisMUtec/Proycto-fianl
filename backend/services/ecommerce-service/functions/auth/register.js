@@ -69,6 +69,9 @@ async function register(event) {
       updatedAt: new Date().toISOString()
     };
 
+    // Alineación con la tabla existente: guardar también la clave 'id' (schema actual de Users-dev usa 'id' como PK)
+    newUser.id = newUser.userId;
+
     await dynamodb.put({
       TableName: USERS_TABLE,
       Item: newUser
