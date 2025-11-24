@@ -15,6 +15,7 @@ export function Navbar({ currentPage }: NavbarProps) {
 
   const profileName = (profile as any)?.nombre || (profile as any)?.name || (profile as any)?.correo_electronico || '';
   const profileRole = String(((profile as any)?.role ?? '').toString().toUpperCase());
+  const showMainMenu = !profile || profileRole === 'USER';
 
   return (
     <header className="sticky top-0 z-50">
@@ -90,23 +91,25 @@ export function Navbar({ currentPage }: NavbarProps) {
       <nav className="bg-white border-t border-b">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center h-16">
-            <ul className="flex space-x-10 uppercase font-semibold text-sm">
-              <li>
-                <button onClick={() => navigate('/menu')} className={`px-2 py-1 ${currentPage === 'menu' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
-                  CARTA
-                </button>
-              </li>
-              <li>
-                <button onClick={() => navigate('/locales')} className={`px-2 py-1 ${currentPage === 'locales' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
-                  LOCALES
-                </button>
-              </li>
-              <li>
-                <a href="https://fridays.mesa247.pe" target="_blank" rel="noreferrer" className="px-2 py-1 text-black hover:text-red-600">
-                  RESERVAS
-                </a>
-              </li>
-            </ul>
+            {showMainMenu ? (
+              <ul className="flex space-x-10 uppercase font-semibold text-sm">
+                <li>
+                  <button onClick={() => navigate('/menu')} className={`px-2 py-1 ${currentPage === 'menu' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
+                    CARTA
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/locales')} className={`px-2 py-1 ${currentPage === 'locales' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
+                    LOCALES
+                  </button>
+                </li>
+                <li>
+                  <a href="https://fridays.mesa247.pe" target="_blank" rel="noreferrer" className="px-2 py-1 text-black hover:text-red-600">
+                    RESERVAS
+                  </a>
+                </li>
+              </ul>
+            ) : null}
           </div>
         </div>
       </nav>

@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { AdminDashboard } from '../components/sections/AdminDashboard';
+// import { AdminDashboard } from '../components/sections/AdminDashboard';
 import { KitchenDashboard } from '../components/sections/KitchenDashboard';
 import { DeliveryDashboard } from '../components/sections/DeliveryDashboard';
 import { UserDashboard } from '../components/sections/UserDashboard';
+import { AdminStats } from '../components/admin/AdminStats';
+import { AdminProducts } from '../components/admin/AdminProducts';
+import { AdminOrders } from '../components/admin/AdminOrders';
+import { AdminUsers } from '../components/admin/AdminUsers';
 
 export function DashboardPage() {
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState('');
+  const [adminSubTab, setAdminSubTab] = useState<'stats' | 'products' | 'orders' | 'users'>('stats');
 
   useEffect(() => {
     if (profile) {
@@ -104,7 +109,39 @@ export function DashboardPage() {
       )}
 
       <div className="container mx-auto px-4 pb-8">
-        {activeTab === 'admin' && <AdminDashboard />}
+        {activeTab === 'admin' && (
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`px-4 py-2 rounded ${'hidden'}`} // placeholder to keep existing UI
+              />
+            </div>
+
+            {/* Admin sub-tabs: Stats / Products (rendered inside dashboard) */}
+            <div className="bg-white p-4 rounded-lg shadow mb-4">
+              <div className="flex space-x-3 flex-wrap">
+                <button onClick={() => setAdminSubTab('stats')} className={`px-4 py-2 rounded ${adminSubTab === 'stats' ? 'bg-red-600 text-white' : 'bg-gray-100'}`}>
+                  Estadísticas
+                </button>
+                <button onClick={() => setAdminSubTab('products')} className={`px-4 py-2 rounded ${adminSubTab === 'products' ? 'bg-red-600 text-white' : 'bg-gray-100'}`}>
+                  Productos
+                </button>
+                <button onClick={() => setAdminSubTab('orders')} className={`px-4 py-2 rounded ${adminSubTab === 'orders' ? 'bg-red-600 text-white' : 'bg-gray-100'}`}>
+                  Órdenes
+                </button>
+                <button onClick={() => setAdminSubTab('users')} className={`px-4 py-2 rounded ${adminSubTab === 'users' ? 'bg-red-600 text-white' : 'bg-gray-100'}`}>
+                  Usuarios
+                </button>
+              </div>
+            </div>
+
+            {adminSubTab === 'stats' && <AdminStats />}
+            {adminSubTab === 'products' && <AdminProducts />}
+            {adminSubTab === 'orders' && <AdminOrders />}
+            {adminSubTab === 'users' && <AdminUsers />}
+          </div>
+        )}
         {activeTab === 'kitchen' && <KitchenDashboard />}
         {activeTab === 'delivery' && <DeliveryDashboard />}
         {activeTab === 'user' && <UserDashboard />}
@@ -112,3 +149,5 @@ export function DashboardPage() {
     </div>
   );
 }
+
+ 

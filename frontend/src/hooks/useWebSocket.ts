@@ -32,22 +32,18 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       return;
     }
 
-    const WS_URL = import.meta.env.VITE_WS_URL;
-    const TENANT_ID = import.meta.env.VITE_DEFAULT_TENANT_ID;
-
-    if (!WS_URL) {
-      console.error('❌ VITE_WS_URL not configured');
-      return;
-    }
+    const WS_URL = import.meta.env.VITE_API_URL_WS ;
+    const TENANT_ID = import.meta.env.VITE_DEFAULT_TENANT_ID || 'sede-quito-001';
 
     // Construir URL con query params
     const userId = profile.id;
-    const role = profile.role || 'USER';
+    const role = (profile.role || 'USER').toString().toUpperCase();
     const tenantId = role === 'USER' ? '' : TENANT_ID;
 
     const wsUrl = `${WS_URL}?userId=${userId}&role=${role}${tenantId ? `&tenantId=${tenantId}` : ''}`;
 
     console.log('🔌 Connecting to WebSocket:', wsUrl);
+    console.log('🔑 WebSocket params:', { userId, role, tenantId });
 
     try {
       const ws = new WebSocket(wsUrl);
