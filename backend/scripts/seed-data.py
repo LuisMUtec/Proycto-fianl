@@ -50,6 +50,7 @@ def seed_users(dynamodb, table_name, tenant_id):
             "lastName": "Cliente",
             "role": "USER",
             "status": "ACTIVE",
+            "tenantId": tenant_id,
             "phone": "+593987654321",
             "address": "Av. República 123, Quito",
             "createdAt": timestamp,
@@ -106,6 +107,20 @@ def seed_users(dynamodb, table_name, tenant_id):
             "status": "ACTIVE",
             "tenantId": tenant_id,
             "phone": "+593987654325",
+            "createdAt": timestamp,
+            "updatedAt": timestamp
+        },
+        {
+            "userId": "user-002",
+            "email": "cliente2@fridays.com",
+            "passwordHash": hashed_password,
+            "firstName": "Laura",
+            "lastName": "Pérez",
+            "role": "USER",
+            "status": "ACTIVE",
+            "tenantId": tenant_id,
+            "phone": "+593987654326",
+            "address": "Av. Amazonas N24-03, Quito",
             "createdAt": timestamp,
             "updatedAt": timestamp
         }
@@ -298,16 +313,17 @@ def seed_sedes(dynamodb, table_name):
     
     sedes = [
         {
-            "tenantId": "sede-quito-001",
-            "name": "TGI Friday's Quito Centro",
-            "address": "Av. Amazonas N24-03 y Colón, Quito",
-            "city": "Quito",
-            "country": "Ecuador",
-            "phone": "+593222345678",
-            "email": "quito.centro@fridays.ec",
+            "tenantId": "sede-miraflores-001",
+            "name": "TGI Friday's Miraflores",
+            "address": "Av. Larco 1301, Miraflores",
+            "city": "Lima",
+            "district": "Miraflores",
+            "country": "Perú",
+            "phone": "+5114451234",
+            "email": "miraflores@fridays.pe",
             "coordinates": {
-                "lat": Decimal("-0.1807"),
-                "lng": Decimal("-78.4678")
+                "lat": Decimal("-12.1219"),
+                "lng": Decimal("-77.0292")
             },
             "openingHours": {
                 "monday": "11:00-23:00",
@@ -323,50 +339,52 @@ def seed_sedes(dynamodb, table_name):
             "updatedAt": timestamp
         },
         {
-            "tenantId": "sede-guayaquil-001",
-            "name": "TGI Friday's Guayaquil Mall del Sol",
-            "address": "Mall del Sol, Av. Joaquín Orrantia, Guayaquil",
-            "city": "Guayaquil",
-            "country": "Ecuador",
-            "phone": "+593442345678",
-            "email": "guayaquil.mall@fridays.ec",
+            "tenantId": "sede-sanisidro-001",
+            "name": "TGI Friday's San Isidro",
+            "address": "Av. Conquistadores 968, San Isidro",
+            "city": "Lima",
+            "district": "San Isidro",
+            "country": "Perú",
+            "phone": "+5114225678",
+            "email": "sanisidro@fridays.pe",
             "coordinates": {
-                "lat": Decimal("-2.1894"),
-                "lng": Decimal("-79.8883")
+                "lat": Decimal("-12.0964"),
+                "lng": Decimal("-77.0375")
             },
             "openingHours": {
-                "monday": "10:00-22:00",
-                "tuesday": "10:00-22:00",
-                "wednesday": "10:00-22:00",
-                "thursday": "10:00-22:00",
-                "friday": "10:00-00:00",
-                "saturday": "10:00-00:00",
-                "sunday": "10:00-22:00"
+                "monday": "11:00-23:00",
+                "tuesday": "11:00-23:00",
+                "wednesday": "11:00-23:00",
+                "thursday": "11:00-23:00",
+                "friday": "11:00-01:00",
+                "saturday": "11:00-01:00",
+                "sunday": "11:00-22:00"
             },
             "active": True,
             "createdAt": timestamp,
             "updatedAt": timestamp
         },
         {
-            "tenantId": "sede-cuenca-001",
-            "name": "TGI Friday's Cuenca",
-            "address": "Av. José Peralta y Ricardo Márquez Tapia, Cuenca",
-            "city": "Cuenca",
-            "country": "Ecuador",
-            "phone": "+593742345678",
-            "email": "cuenca@fridays.ec",
+            "tenantId": "sede-surco-001",
+            "name": "TGI Friday's Surco",
+            "address": "Av. Primavera 2680, Surco",
+            "city": "Lima",
+            "district": "Surco",
+            "country": "Perú",
+            "phone": "+5113449012",
+            "email": "surco@fridays.pe",
             "coordinates": {
-                "lat": Decimal("-2.9001"),
-                "lng": Decimal("-79.0059")
+                "lat": Decimal("-12.1391"),
+                "lng": Decimal("-76.9897")
             },
             "openingHours": {
-                "monday": "11:00-22:00",
-                "tuesday": "11:00-22:00",
-                "wednesday": "11:00-22:00",
-                "thursday": "11:00-22:00",
-                "friday": "11:00-23:00",
-                "saturday": "11:00-23:00",
-                "sunday": "11:00-21:00"
+                "monday": "11:00-23:00",
+                "tuesday": "11:00-23:00",
+                "wednesday": "11:00-23:00",
+                "thursday": "11:00-23:00",
+                "friday": "11:00-01:00",
+                "saturday": "11:00-01:00",
+                "sunday": "11:00-22:00"
             },
             "active": True,
             "createdAt": timestamp,
@@ -379,7 +397,7 @@ def seed_sedes(dynamodb, table_name):
     for sede in sedes:
         try:
             table.put_item(Item=sede)
-            print(f"  📍 {sede['city']:12} | {sede['name']}")
+            print(f"  📍 {sede['district']:12} | {sede['name']}")
         except Exception as e:
             print(f"❌ Error insertando sede {sede['name']}: {e}")
     

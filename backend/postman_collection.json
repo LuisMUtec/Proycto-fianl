@@ -1,27 +1,27 @@
 {
   "info": {
     "name": "🍔 Fridays - Sistema de Órdenes",
-    "description": "Colección de Postman para probar el flujo completo de órdenes\n\n📝 FLUJO RECOMENDADO:\n1️⃣ Autenticación → Login como Cliente\n2️⃣ Productos → Listar Menú (ver productos disponibles)\n3️⃣ Órdenes → Crear Orden con productos del menú\n4️⃣ WebSocket → Conectar para recibir notificaciones\n5️⃣ Login como Chef → Actualizar orden a COOKING\n6️⃣ Continuar flujo hasta DELIVERED\n\n👥 USUARIOS PRE-CONFIGURADOS (Password: todos123):\n- cliente@fridays.com (USER) - Para crear órdenes\n- chef@fridays.com (COOK) - Para cocinar\n- delivery@fridays.com (DISPATCHER) - Para entregar\n- admin@fridays.com (ADMIN) - Para gestionar menú\n\n🔗 ENDPOINTS:\n- API: https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev\n- WebSocket: wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev\n\n🎯 TenantId: sede-quito-001",
+    "description": "Colección de Postman para probar el flujo completo de órdenes\n\n📝 FLUJO RECOMENDADO:\n1️⃣ Autenticación → Login como Cliente\n2️⃣ Productos → Listar Menú (ver productos disponibles)\n3️⃣ Órdenes → Crear Orden con productos del menú\n4️⃣ WebSocket → Conectar para recibir notificaciones\n5️⃣ Login como Chef → Actualizar orden a COOKING\n6️⃣ Continuar flujo hasta DELIVERED\n\n👥 USUARIOS PRE-CONFIGURADOS (Password: todos123):\n- cliente@fridays.com (USER) - Para crear órdenes\n- chef@fridays.com (COOK) - Para cocinar\n- delivery@fridays.com (DISPATCHER) - Para entregar\n- admin@fridays.com (ADMIN) - Para gestionar menú\n\n🔗 ENDPOINTS:\n- API: https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev\n- WebSocket: wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev\n\n🎯 TenantId: sede-miraflores-001",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "base_url",
-      "value": "https://k6jm5wvb0h.execute-api.us-east-1.amazonaws.com/dev",
+      "value": "https://akq8j1edpg.execute-api.us-east-1.amazonaws.com/dev",
       "type": "string",
       "description": "✅ API Gateway endpoint - Ya configurado"
     },
     {
       "key": "ws_url",
-      "value": "wss://i1gzzaf7nf.execute-api.us-east-1.amazonaws.com/dev",
+      "value": "wss://1gw09jhux1.execute-api.us-east-1.amazonaws.com/dev",
       "type": "string",
       "description": "✅ WebSocket endpoint - Ya configurado"
     },
     {
       "key": "tenant_id",
-      "value": "sede-quito-001",
+      "value": "sede-miraflores-001",
       "type": "string",
-      "description": "TenantId de la sede principal (Quito). Creado por el script de seed"
+      "description": "TenantId de la sede principal (Miraflores, Lima). Creado por el script de seed"
     },
     {
       "key": "user_id",
@@ -95,8 +95,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "🎯 **EMPIEZA AQUÍ** - Login como cliente\n\n📝 FLUJO COMPLETO:\n1️⃣ **Ejecuta este request primero** (Login Cliente)\n2️⃣ Ir a Productos → Listar Menú\n3️⃣ Ir a Order Workflow → Crear Orden\n4️⃣ Ir a WebSocket → Conectar WebSocket\n5️⃣ Volver aquí → Login Chef\n6️⃣ Ir a Update Order Status → Actualizar a COOKING\n7️⃣ Continuar actualizando estados hasta DELIVERED\n\n👤 Credenciales de Cliente:\n- Email: cliente@fridays.com\n- Password: todos123\n- Role: USER\n- Nombre: Juan Cliente\n\n✨ Qué hace:\n- Valida credenciales\n- Genera token JWT (válido 7 días)\n- Guarda automáticamente en {{auth_token}}\n- Guarda userId en {{user_id}}\n\n🎯 Usa esta cuenta para:\n- ✅ Crear órdenes\n- ✅ Ver menú de productos\n- ✅ Recibir notificaciones WebSocket de tus pedidos"
           },
@@ -137,8 +142,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "👤 Login como cliente\n\nCredenciales:\n- Email: cliente@fridays.com\n- Password: todos123\n- Role: USER\n\nUsa esta cuenta para:\n- Crear órdenes\n- Ver tu menú\n- Recibir notificaciones de tus pedidos"
           },
@@ -179,10 +189,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
-            "description": "👨‍🍳 Login como chef\n\nCredenciales:\n- Email: chef@fridays.com\n- Password: todos123\n- Role: COOK\n- TenantId: sede-quito-001\n\nUsa esta cuenta para:\n- Actualizar estado de órdenes a COOKING, READY\n- Ver todas las órdenes del tenant\n- Recibir notificaciones de nuevas órdenes"
+            "description": "👨‍🍳 Login como chef\n\nCredenciales:\n- Email: chef@fridays.com\n- Password: todos123\n- Role: COOK\n- TenantId: sede-miraflores-001\n\nUsa esta cuenta para:\n- Actualizar estado de órdenes a COOKING, READY\n- Ver todas las órdenes del tenant\n- Recibir notificaciones de nuevas órdenes"
           },
           "response": []
         },
@@ -221,10 +236,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
-            "description": "🚗 Login como dispatcher/delivery\n\nCredenciales:\n- Email: delivery@fridays.com\n- Password: todos123\n- Role: DISPATCHER\n- TenantId: sede-quito-001\n\nUsa esta cuenta para:\n- Actualizar estado de órdenes a PACKAGED, ON_THE_WAY, DELIVERED\n- Ver órdenes listas para despacho\n- Recibir notificaciones de órdenes listas"
+            "description": "🚗 Login como dispatcher/delivery\n\nCredenciales:\n- Email: delivery@fridays.com\n- Password: todos123\n- Role: DISPATCHER\n- TenantId: sede-miraflores-001\n\nUsa esta cuenta para:\n- Actualizar estado de órdenes a PACKAGED, ON_THE_WAY, DELIVERED\n- Ver órdenes listas para despacho\n- Recibir notificaciones de órdenes listas"
           },
           "response": []
         },
@@ -263,10 +283,15 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
-            "description": "👔 Login como administrador\n\nCredenciales:\n- Email: admin@fridays.com\n- Password: todos123\n- Role: ADMIN\n- TenantId: sede-quito-001\n\nUsa esta cuenta para:\n- Crear/editar productos del menú\n- Cambiar disponibilidad de productos\n- Ver todas las órdenes y estadísticas\n- Gestionar usuarios y configuración"
+            "description": "👔 Login como administrador\n\nCredenciales:\n- Email: admin@fridays.com\n- Password: todos123\n- Role: ADMIN\n- TenantId: sede-miraflores-001\n\nUsa esta cuenta para:\n- Crear/editar productos del menú\n- Cambiar disponibilidad de productos\n- Ver todas las órdenes y estadísticas\n- Gestionar usuarios y configuración"
           },
           "response": []
         },
@@ -306,8 +331,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "📝 Registra un nuevo usuario en el sistema\n\n🔒 SEGURIDAD: El rol siempre es USER\nNo se puede especificar rol desde el cliente. Los roles administrativos (COOK, DISPATCHER, ADMIN) se crean desde el panel de administración o script de seed.\n\n✅ Campos requeridos:\n- email: Email único del usuario\n- password: Mínimo 6 caracteres\n- firstName: Nombre\n- lastName: Apellido\n\n📋 Campos opcionales:\n- phoneNumber: Teléfono de contacto\n- address: Dirección de entrega\n\n🎯 Retorna:\n- token: JWT para autenticación\n- user: Información del usuario creado (siempre con role: USER)"
           },
@@ -342,8 +372,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "⚠️ DEPRECADO: Este endpoint ya NO permite crear usuarios con roles administrativos.\n\n🔒 SEGURIDAD: El endpoint /auth/register siempre crea usuarios con rol USER.\n\n✅ Para crear usuarios staff usa:\n1. 📝 Script de seed: `python backend/scripts/seed-data.py --stage dev`\n2. 👔 Panel de administración (próximamente)\n3. 🗄️ Directamente en DynamoDB\n\n👥 Usuarios pre-configurados (password: todos123):\n- cliente@fridays.com (USER)\n- chef@fridays.com (COOK)\n- delivery@fridays.com (DISPATCHER)\n- admin@fridays.com (ADMIN)"
           },
@@ -383,8 +418,13 @@
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "Login genérico para usuarios creados manualmente\n\nPara usuarios pre-configurados, usa:\n- 'Login - Cliente (USER)'\n- 'Login - Chef (COOK)'\n- 'Login - Delivery (DISPATCHER)'\n- 'Login - Admin (ADMIN)'"
           },
@@ -402,8 +442,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/menu?limit=20",
-              "host": ["{{base_url}}"],
-              "path": ["menu"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "menu"
+              ],
               "query": [
                 {
                   "key": "limit",
@@ -427,8 +471,13 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/menu/FOOD",
-              "host": ["{{base_url}}"],
-              "path": ["menu", "FOOD"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "menu",
+                "FOOD"
+              ]
             },
             "description": "Lista productos filtrados por categoría. Endpoint público.\n\nCategorías válidas:\n- FOOD: Comida\n- DRINK: Bebidas\n- DESSERT: Postres\n- COMBO: Combos"
           },
@@ -471,8 +520,13 @@
             },
             "url": {
               "raw": "{{base_url}}/menu/productos",
-              "host": ["{{base_url}}"],
-              "path": ["menu", "productos"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "menu",
+                "productos"
+              ]
             },
             "description": "Crea un nuevo producto en el menú. Requiere rol ADMIN.\n\n🔒 Endpoint protegido - Requiere token JWT"
           },
@@ -498,8 +552,14 @@
             },
             "url": {
               "raw": "{{base_url}}/menu/items/{{product_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["menu", "items", "{{product_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "menu",
+                "items",
+                "{{product_id}}"
+              ]
             },
             "description": "Actualiza un producto existente. Requiere rol ADMIN.\n\n🔒 Endpoint protegido - Requiere token JWT"
           },
@@ -525,10 +585,40 @@
             },
             "url": {
               "raw": "{{base_url}}/menu/items/{{product_id}}/availability",
-              "host": ["{{base_url}}"],
-              "path": ["menu", "items", "{{product_id}}", "availability"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "menu",
+                "items",
+                "{{product_id}}",
+                "availability"
+              ]
             },
             "description": "Activa o desactiva la disponibilidad de un producto. Requiere rol ADMIN.\n\n🔒 Endpoint protegido - Requiere token JWT"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏢 1.5. Sedes (Restaurantes)",
+      "item": [
+        {
+          "name": "Listar Sedes (Público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes"
+              ]
+            },
+            "description": "Lista todas las sedes activas disponibles. Endpoint público, no requiere autenticación.\\n\\n📍 Retorna información de cada sede:\\n- tenantId: ID único de la sede\\n- name: Nombre del restaurante\\n- address: Dirección completa\\n- city: Ciudad\\n- district: Distrito\\n- coordinates: Latitud y longitud\\n- openingHours: Horarios de atención\\n- phone: Teléfono de contacto\\n\\n💡 Usa el tenantId al crear una orden para especificar de qué sede quieres ordenar."
           },
           "response": []
         }
@@ -572,14 +662,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod-001\",\n      \"quantity\": 2,\n      \"notes\": \"Sin cebolla\"\n    },\n    {\n      \"productId\": \"prod-003\",\n      \"quantity\": 1,\n      \"notes\": \"Extra picante\"\n    },\n    {\n      \"productId\": \"prod-005\",\n      \"quantity\": 2\n    },\n    {\n      \"productId\": \"prod-006\",\n      \"quantity\": 1\n    }\n  ],\n  \"notes\": \"Para llevar. Incluir cubiertos y servilletas\",\n  \"paymentMethod\": \"CARD\",\n  \"deliveryAddress\": \"Av. Amazonas N21-147, Quito\"\n}"
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod-001\",\n      \"quantity\": 2,\n      \"notes\": \"Sin cebolla\"\n    },\n    {\n      \"productId\": \"prod-003\",\n      \"quantity\": 1,\n      \"notes\": \"Extra picante\"\n    },\n    {\n      \"productId\": \"prod-005\",\n      \"quantity\": 2\n    },\n    {\n      \"productId\": \"prod-006\",\n      \"quantity\": 1\n    }\n  ],\n  \"notes\": \"Para llevar. Incluir cubiertos y servilletas\",\n  \"paymentMethod\": \"CARD\",\n  \"deliveryAddress\": \"Av. Amazonas N21-147, Quito\",\n  \"tenantId\": \"sede-miraflores-001\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/orders",
-              "host": ["{{base_url}}"],
-              "path": ["orders"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
             },
-            "description": "🍔 Crea una nueva orden usando Step Functions\n\n📋 FLUJO:\n1. PrepareOrderData - Valida y enriquece items con info de productos\n2. PersistAndBuildOrder - Guarda orden en DynamoDB\n3. PublishOrderCreatedEvent - Publica evento ORDER_CREATED en EventBridge\n4. WebSocket broadcast - Notifica a usuarios conectados\n\n🔒 Requiere: Token JWT (rol USER)\n📦 userId y tenantId: Se extraen automáticamente del token\n\n🍽️ PRODUCTOS DISPONIBLES (del seed):\n- prod-001: 🍔 Jack Daniel's Burger ($12.99)\n- prod-002: 🍖 Costillas BBQ ($18.50)\n- prod-003: 🍗 Alitas Picantes ($10.99)\n- prod-004: 🥗 Caesar Salad ($9.99)\n- prod-005: 🍹 Margarita Clásica ($7.50)\n- prod-006: 🍋 Limonada Natural ($3.50)\n- prod-007: 🍺 Cerveza Corona ($4.00)\n- prod-008: 🍰 Brownie con Helado ($6.99)\n- prod-009: 🍰 Cheesecake de Fresa ($5.99)\n- prod-010: 📦 Combo Familiar ($39.99)\n\n💰 TOTAL EJEMPLO: (2 × $12.99) + (2 × $7.50) = $40.98"
+            "description": "🍔 Crea una nueva orden usando Step Functions\n\n📋 FLUJO:\n1. PrepareOrderData - Valida y enriquece items con info de productos\n2. PersistAndBuildOrder - Guarda orden en DynamoDB\n3. PublishOrderCreatedEvent - Publica evento ORDER_CREATED en EventBridge\n4. WebSocket broadcast - Notifica a usuarios conectados\n\n🔒 Requiere: Token JWT (rol USER)\n📦 userId: Se extrae automáticamente del token\\n🏢 tenantId: Opcional. Si no se especifica, usa la sede del usuario (del JWT)\n\n🍽️ PRODUCTOS DISPONIBLES (del seed):\n- prod-001: 🍔 Jack Daniel's Burger ($12.99)\n- prod-002: 🍖 Costillas BBQ ($18.50)\n- prod-003: 🍗 Alitas Picantes ($10.99)\n- prod-004: 🥗 Caesar Salad ($9.99)\n- prod-005: 🍹 Margarita Clásica ($7.50)\n- prod-006: 🍋 Limonada Natural ($3.50)\n- prod-007: 🍺 Cerveza Corona ($4.00)\n- prod-008: 🍰 Brownie con Helado ($6.99)\n- prod-009: 🍰 Cheesecake de Fresa ($5.99)\n- prod-010: 📦 Combo Familiar ($39.99)\n\n💰 TOTAL EJEMPLO: (2 × $12.99) + (2 × $7.50) = $40.98"
           },
           "response": []
         }
@@ -623,8 +717,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "El cocinero actualiza el estado de la orden a COOKING. Este endpoint:\n1. Actualiza el estado en DynamoDB\n2. Publica evento ORDER_STATUS_CHANGED en EventBridge\n3. El evento dispara la Lambda broadcast que notifica a usuarios conectados vía WebSocket\n\n🔒 Endpoint protegido - Requiere token JWT con rol COOK, DISPATCHER o ADMIN"
           },
@@ -650,8 +751,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "El cocinero marca la orden como lista para empaquetar"
           },
@@ -677,8 +785,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "El empaquetador marca la orden como empaquetada"
           },
@@ -704,8 +819,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "El repartidor recoge la orden y la marca como en camino"
           },
@@ -731,8 +853,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "El repartidor marca la orden como entregada. Esta es una acción final que marca resolvedAt"
           },
@@ -758,8 +887,15 @@
             },
             "url": {
               "raw": "{{base_url}}/orders/{{tenant_id}}/{{order_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["orders", "{{tenant_id}}", "{{order_id}}", "status"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders",
+                "{{tenant_id}}",
+                "{{order_id}}",
+                "status"
+              ]
             },
             "description": "Cancela la orden. Esta es una acción final que marca resolvedAt"
           },
@@ -776,24 +912,19 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ws_url}}?userId={{user_id}}&tenantId={{tenant_id}}&role=USER",
-              "host": ["{{ws_url}}"],
+              "raw": "{{ws_url}}?token={{auth_token}}",
+              "host": [
+                "{{ws_url}}"
+              ],
               "query": [
                 {
-                  "key": "userId",
-                  "value": "{{user_id}}"
-                },
-                {
-                  "key": "tenantId",
-                  "value": "{{tenant_id}}"
-                },
-                {
-                  "key": "role",
-                  "value": "USER"
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "description": "Token JWT obtenido del login"
                 }
               ]
             },
-            "description": "Conecta al WebSocket como usuario cliente.\n\n🌐 URL WebSocket:\nDespués de 'serverless deploy', copia el endpoint:\n  ServiceEndpointWebsocket: wss://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev\n\nY actualiza la variable {{ws_url}} en Postman\n\n⚡ Cómo probar WebSocket:\n\n1. En Postman:\n   - New Request → WebSocket\n   - URL: {{ws_url}}?userId={{user_id}}&tenantId={{tenant_id}}&role=USER\n   - Click 'Connect'\n   - Los mensajes llegarán cuando se actualice el estado de una orden\n\n2. Código JavaScript para el frontend:\n\n```javascript\nconst userId = 'user-001'; // Del JWT\nconst tenantId = 'sede-quito-001';\nconst role = 'USER';\n\nconst ws = new WebSocket(\n  `wss://YOUR_WS_ID.execute-api.us-east-1.amazonaws.com/dev?userId=${userId}&tenantId=${tenantId}&role=${role}`\n);\n\nws.onopen = () => console.log('✅ Conectado al WebSocket');\n\nws.onmessage = (event) => {\n  const notification = JSON.parse(event.data);\n  console.log('📬 Nueva notificación:', notification);\n  \n  // Mostrar notificación al usuario\n  if (notification.type === 'ORDER_STATUS_CHANGED') {\n    alert(`${notification.message} - Estado: ${notification.status}`);\n  }\n};\n\nws.onerror = (error) => console.error('❌ Error:', error);\nws.onclose = () => console.log('🔌 Desconectado');\n```\n\nMensajes esperados:\n- ORDER_CREATED: Cuando se crea una orden\n- ORDER_STATUS_CHANGED: Cuando cambia el estado de una orden"
+            "description": "Conecta al WebSocket usando el token JWT.\n\n🌐 URL WebSocket:\nDespués de 'serverless deploy', copia el endpoint:\n  ServiceEndpointWebsocket: wss://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev\n\nY actualiza la variable {{ws_url}} en Postman\n\n⚡ Cómo probar WebSocket:\n\n1. En Postman:\n   - New Request → WebSocket\n   - URL: {{ws_url}}?token={{auth_token}}\n   - Click 'Connect'\n   - Los mensajes llegarán cuando se actualice el estado de una orden\n\n2. Código JavaScript para el frontend:\n\n```javascript\nconst token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Token del login\n\nconst ws = new WebSocket(\n  `wss://YOUR_WS_ID.execute-api.us-east-1.amazonaws.com/dev?token=${token}`\n);\n\nws.onopen = () => console.log('✅ Conectado al WebSocket');\n\nws.onmessage = (event) => {\n  const notification = JSON.parse(event.data);\n  console.log('📬 Nueva notificación:', notification);\n  \n  // Mostrar notificación al usuario\n  if (notification.type === 'ORDER_STATUS_CHANGED') {\n    alert(`${notification.message} - Estado: ${notification.status}`);\n  }\n};\n\nws.onerror = (error) => console.error('❌ Error:', error);\nws.onclose = () => console.log('🔌 Desconectado');\n```\n\nMensajes esperados:\n- ORDER_CREATED: Cuando se crea una orden\n- ORDER_STATUS_CHANGED: Cuando cambia el estado de una orden"
           },
           "response": []
         },
@@ -804,7 +935,9 @@
             "header": [],
             "url": {
               "raw": "{{ws_url}}?userId=cook-001&tenantId={{tenant_id}}&role=COOK",
-              "host": ["{{ws_url}}"],
+              "host": [
+                "{{ws_url}}"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -837,8 +970,12 @@
             "url": {
               "raw": "http://localhost/example",
               "protocol": "http",
-              "host": ["localhost"],
-              "path": ["example"]
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "example"
+              ]
             },
             "description": "Este es un ejemplo del mensaje que recibirás en el WebSocket cuando se crea una orden:\n\n```json\n{\n  \"type\": \"ORDER_CREATED\",\n  \"orderId\": \"uuid-orden\",\n  \"status\": \"CREATED\",\n  \"message\": \"✅ Tu pedido ha sido confirmado\",\n  \"timestamp\": \"2025-11-22T10:30:00Z\",\n  \"data\": {\n    \"orderId\": \"uuid-orden\",\n    \"tenantId\": \"TENANT#001\",\n    \"status\": \"CREATED\",\n    \"total\": 55.5,\n    \"items\": [\n      {\n        \"productId\": \"PRODUCT#001\",\n        \"name\": \"Hamburguesa Clásica\",\n        \"quantity\": 2,\n        \"unitPrice\": 18.5,\n        \"subtotal\": 37.0\n      }\n    ]\n  }\n}\n```"
           },
@@ -852,8 +989,12 @@
             "url": {
               "raw": "http://localhost/example",
               "protocol": "http",
-              "host": ["localhost"],
-              "path": ["example"]
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "example"
+              ]
             },
             "description": "Este es un ejemplo del mensaje que recibirás en el WebSocket cuando cambia el estado:\n\n```json\n{\n  \"type\": \"ORDER_STATUS_CHANGED\",\n  \"orderId\": \"uuid-orden\",\n  \"status\": \"COOKING\",\n  \"message\": \"👨‍🍳 Tu pedido está en preparación\",\n  \"timestamp\": \"2025-11-22T10:35:00Z\",\n  \"data\": {\n    \"orderId\": \"uuid-orden\",\n    \"tenantId\": \"TENANT#001\",\n    \"status\": \"COOKING\",\n    \"previousStatus\": \"CREATED\",\n    \"changedBy\": \"COOK#456\",\n    \"total\": 55.5,\n    \"items\": [...]\n  }\n}\n```\n\nMensajes según el estado:\n- CREATED: ✅ Tu pedido ha sido confirmado\n- COOKING: 👨‍🍳 Tu pedido está en preparación\n- READY: 🔔 Tu pedido está listo\n- PACKAGED: 📦 Tu pedido está siendo empaquetado\n- ON_THE_WAY: 🚗 Tu pedido está en camino\n- DELIVERED: 🎉 ¡Pedido entregado! ¡Disfruta!\n- CANCELLED: ❌ Tu pedido ha sido cancelado"
           },

@@ -25,6 +25,11 @@ def handler(event, context):
         tenant_id = event.get('tenantId')
         user_id = event.get('userId')
         
+        # 🔍 DEBUG: Log valores extraídos del evento
+        print(f"[PublishOrderCreatedEvent] 🔍 orderId: '{order_id}'")
+        print(f"[PublishOrderCreatedEvent] 🔍 userId: '{user_id}'")
+        print(f"[PublishOrderCreatedEvent] 🔍 tenantId: '{tenant_id}'")
+        
         if not order_id:
             raise ValueError("orderId es requerido")
         
@@ -40,6 +45,9 @@ def handler(event, context):
             'timestamp': datetime.utcnow().isoformat() + 'Z',
             'eventType': 'ORDER_CREATED'
         }
+        
+        # 🔍 DEBUG: Log del evento completo antes de publicar
+        print(f"[PublishOrderCreatedEvent] 🔍 Event detail a publicar: {json.dumps(event_detail, default=str)}")
         
         # Publicar en EventBridge
         response = eventbridge.put_events(

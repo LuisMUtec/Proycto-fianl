@@ -45,6 +45,12 @@ def handler(event, context):
         user_id = detail.get('userId')  # Usuario dueño de la orden
         new_status = detail.get('newStatus') or detail.get('status')
         
+        # 🔍 DEBUG: Log detallado del evento recibido
+        print(f"[orderEventsToWS] 🔍 Event detail completo: {json.dumps(detail, default=str)}")
+        print(f"[orderEventsToWS] 🔍 eventType: '{event_type}'")
+        print(f"[orderEventsToWS] 🔍 orderId: '{order_id}'")
+        print(f"[orderEventsToWS] 🔍 userId extraído: '{user_id}'")
+        print(f"[orderEventsToWS] 🔍 tenantId: '{tenant_id}'")
         print(f"[orderEventsToWS] Procesando evento {event_type} para orden {order_id}")
         
         # Construir mensaje para el cliente
@@ -155,14 +161,29 @@ def get_relevant_connections(tenant_id, user_id):
     try:
         # Obtener conexiones del usuario dueño de la orden
         if user_id:
+            # 🔍 DEBUG: Log antes de consultar
+            print(f"[orderEventsToWS] 🔍 Buscando conexiones para userId: '{user_id}'")
+            
             response = ws_connections_table.query(
                 IndexName='userId-index',
                 KeyConditionExpression=Key('userId').eq(user_id)
             )
-            connections.extend(response.get('Items', []))
+            user_connections = response.get('Items', [])
+            
+            # 🔍 DEBUG: Log de resultados de la query
+            print(f"[orderEventsToWS] 🔍 Conexiones encontradas para userId '{user_id}': {len(user_connections)}")
+            if user_connections:
+                print(f"[orderEventsToWS] 🔍 Detalles de conexiones: {json.dumps(user_connections, default=str)}")
+            else:
+                print(f"[orderEventsToWS] ⚠️ NO se encontraron conexiones para userId '{user_id}'")
+            
+            connections.extend(user_connections)
         
         # Obtener conexiones del tenant (staff)
         if tenant_id:
+            # 🔍 DEBUG: Log antes de consultar tenant
+            print(f"[orderEventsToWS] 🔍 Buscando conexiones staff para tenantId: '{tenant_id}'")
+            
             response = ws_connections_table.query(
                 IndexName='tenantId-index',
                 KeyConditionExpression=Key('tenantId').eq(tenant_id)
@@ -172,11 +193,22 @@ def get_relevant_connections(tenant_id, user_id):
                 conn for conn in response.get('Items', [])
                 if conn.get('role') in ['COOK', 'DISPATCHER', 'ADMIN']
             ]
+            
+            # 🔍 DEBUG: Log de conexiones staff
+            print(f"[orderEventsToWS] 🔍 Conexiones staff encontradas: {len(staff_connections)}")
+            
             connections.extend(staff_connections)
         
         # Eliminar duplicados por connectionId
         unique_connections = {conn['connectionId']: conn for conn in connections}
-        return list(unique_connections.values())
+        final_connections = list(unique_connections.values())
+        
+        # 🔍 DEBUG: Log final de conexiones únicas
+        print(f"[orderEventsToWS] 🔍 Total conexiones únicas a notificar: {len(final_connections)}")
+        for conn in final_connections:
+            print(f"[orderEventsToWS] 🔍   - connectionId: {conn['connectionId']}, userId: {conn.get('userId')}, role: {conn.get('role')}")
+        
+        return final_connections
         
     except Exception as e:
         print(f"[orderEventsToWS] Error al obtener conexiones: {str(e)}")

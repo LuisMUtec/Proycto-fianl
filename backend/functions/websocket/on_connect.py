@@ -23,26 +23,30 @@ def handler(event, context):
         # Extraer información de la conexión
         connection_id = event['requestContext']['connectionId']
         
-        # Extraer query string parameters (userId, tenantId, role)
-        query_params = event.get('queryStringParameters') or {}
-        user_id = query_params.get('userId')
-        tenant_id = query_params.get('tenantId')
-        role = query_params.get('role', 'USER')
+        # Extraer información del authorizer context (poblado por el JWT authorizer)
+        authorizer = event.get('requestContext', {}).get('authorizer', {})
+        user_id = authorizer.get('userId')
+        tenant_id = authorizer.get('tenantId')
+        role = authorizer.get('role', 'USER')
+        
+        # 🔍 DEBUG: Log detallado del authorizer context
+        print(f"[onConnect] 🔍 Authorizer context: {json.dumps(authorizer)}")
+        print(f"[onConnect] 🔍 userId extraído: '{user_id}'")
+        print(f"[onConnect] 🔍 tenantId extraído: '{tenant_id}'")
+        print(f"[onConnect] 🔍 role extraído: '{role}'")
         
         # Validaciones
         if not user_id:
-            print(f"[onConnect] Error: userId no proporcionado")
+            print(f"[onConnect] Error: userId no proporcionado en authorizer context")
             return {
                 'statusCode': 400,
-                'body': json.dumps({'message': 'userId es requerido en query string'})
+                'body': json.dumps({'message': 'userId no encontrado en token JWT'})
             }
         
-        if not tenant_id:
-            print(f"[onConnect] Error: tenantId no proporcionado")
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'message': 'tenantId es requerido en query string'})
-            }
+        # tenantId puede ser null para usuarios regulares, solo validamos que exista el campo
+        if tenant_id is None or tenant_id == '':
+            print(f"[onConnect] ⚠️ Advertencia: tenantId es null/vacío para usuario {user_id}")
+            # No retornamos error, permitimos conexión sin tenantId
         
         # Calcular TTL (24 horas desde ahora)
         current_time = datetime.utcnow()
@@ -60,7 +64,9 @@ def handler(event, context):
         
         ws_connections_table.put_item(Item=connection_item)
         
-        print(f"[onConnect] Conexión registrada: {connection_id} para usuario {user_id}")
+        # 🔍 DEBUG: Confirmar datos guardados
+        print(f"[onConnect] ✅ Conexión registrada: {connection_id} para usuario {user_id}")
+        print(f"[onConnect] 🔍 Item guardado en DynamoDB: {json.dumps(connection_item, default=str)}")
         
         return {
             'statusCode': 200,
