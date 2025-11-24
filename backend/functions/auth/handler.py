@@ -68,7 +68,7 @@ def register(event):
         # SEGURIDAD: El rol siempre es USER para registro público
         # Los roles administrativos (COOK, DISPATCHER, ADMIN) deben crearse desde el panel de administración
         role = 'USER'
-        tenant_id = None  # Los usuarios normales no tienen tenantId
+        tenant_id = 'sede-miraflores-001'  # Todos los usuarios se asignan a la sede principal por defecto
         
         # Validaciones
         if not email:
@@ -125,9 +125,8 @@ def register(event):
             'updatedAt': current_time
         }
         
-        # Agregar tenantId si es staff
-        if role in ['COOK', 'DISPATCHER', 'ADMIN'] and tenant_id:
-            user['tenantId'] = tenant_id
+        # Agregar tenantId a todos los usuarios
+        user['tenantId'] = tenant_id
         
         # Guardar en DynamoDB
         users_table.put_item(Item=user)

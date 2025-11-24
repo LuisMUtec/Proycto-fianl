@@ -59,9 +59,18 @@ def handler(event, context):
             'timestamp': datetime.utcnow().isoformat() + 'Z'
         }
         
-        # Si el usuario es staff, usar su tenantId
-        if auth.get('tenantId'):
-            workflow_input['tenantId'] = auth['tenantId']
+        # Determinar tenantId para la orden
+        # 1. Si el usuario especifica un tenantId en el body, usarlo
+        # 2. Si no, usar el tenantId del usuario (del JWT)
+        if not workflow_input['tenantId']:
+            workflow_input['tenantId'] = auth.get('tenantId')
+        
+        # Validar que tenantId no sea None
+        if not workflow_input['tenantId']:
+            return build_response(400, {
+                'message': 'tenantId es requerido. Especifícalo en el body o asegúrate de tener uno asignado.',
+                'code': 'VALIDATION_ERROR'
+            })
         
         # Iniciar ejecución del Step Function
         print(f"[CreateOrder] Iniciando Step Function con input: {json.dumps(workflow_input)}")

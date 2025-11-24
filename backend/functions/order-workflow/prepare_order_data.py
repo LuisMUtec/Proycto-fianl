@@ -14,6 +14,7 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 products_table = dynamodb.Table(os.environ['PRODUCTS_TABLE'])
 users_table = dynamodb.Table(os.environ['USERS_TABLE'])
+sedes_table = dynamodb.Table(os.environ['SEDES_TABLE'])
 
 
 def handler(event, context):
@@ -51,6 +52,19 @@ def handler(event, context):
         except Exception as e:
             print(f"[PrepareOrderData] Error al obtener usuario: {str(e)}")
             raise ValueError(f"Error al validar usuario: {str(e)}")
+        
+        # Validar que la sede existe y está activa
+        try:
+            sede_response = sedes_table.get_item(Key={'tenantId': tenant_id})
+            if 'Item' not in sede_response:
+                raise ValueError(f"Sede {tenant_id} no encontrada")
+            sede = sede_response['Item']
+            if not sede.get('active', False):
+                raise ValueError(f"Sede {sede.get('name', tenant_id)} no está activa")
+            print(f"[PrepareOrderData] Sede validada: {sede.get('name')}")
+        except Exception as e:
+            print(f"[PrepareOrderData] Error al validar sede: {str(e)}")
+            raise ValueError(f"Error al validar sede: {str(e)}")
         
         # Enriquecer items con información de productos
         enriched_items = []

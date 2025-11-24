@@ -14,7 +14,7 @@ provider:
   # ⚠️ REEMPLAZA 123456789012 CON TU AWS ACCOUNT ID
   # Para obtenerlo: aws sts get-caller-identity --query Account --output text
   iam:
-    role: arn:aws:iam::458889128053:role/LabRole  # 👈 REEMPLAZA CON TU ACCOUNT ID
+    role: arn:aws:iam::292984540358:role/LabRole  # 👈 REEMPLAZA CON TU ACCOUNT ID
   
   layers:
     - Ref: PythonRequirementsLambdaLayer
@@ -116,6 +116,22 @@ functions:
             resultTtlInSeconds: 300
 
   # ==========================================
+  # SEDES SERVICE - Listar Sedes
+  # ==========================================
+  
+  sedesService:
+    handler: functions/sedes/handler.handler
+    environment:
+      SEDES_TABLE: ${self:provider.environment.SEDES_TABLE}
+    description: "Lista sedes disponibles (público)"
+    events:
+      - http:
+          path: /sedes
+          method: GET
+          cors: true
+
+
+  # ==========================================
   # ORDER WORKFLOW - Step Functions Lambdas
   # ==========================================
   
@@ -124,6 +140,7 @@ functions:
     environment:
       PRODUCTS_TABLE: ${self:provider.environment.PRODUCTS_TABLE}
       USERS_TABLE: ${self:provider.environment.USERS_TABLE}
+      SEDES_TABLE: ${self:provider.environment.SEDES_TABLE}
     description: "Valida y prepara los datos de la orden antes de persistir"
 
   persistAndBuildOrder:
@@ -169,6 +186,10 @@ functions:
     events:
       - websocket:
           route: $connect
+          authorizer:
+            name: authorizer
+            identitySource:
+              - 'route.request.querystring.token'
 
   onDisconnect:
     handler: functions/websocket/on_disconnect.handler
@@ -228,7 +249,7 @@ stepFunctions:
   stateMachines:
     orderWorkflow:
       name: orderWorkflow-${self:provider.stage}
-      role: arn:aws:iam::458889128053:role/LabRole
+      role: arn:aws:iam::292984540358:role/LabRole
       definition:
         Comment: "Order creation workflow"
         StartAt: PrepareOrderData

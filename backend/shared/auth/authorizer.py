@@ -24,13 +24,23 @@ def handler(event, context):
         # Extraer token según el tipo de authorizer
         # TOKEN authorizer: event['authorizationToken']
         # REQUEST authorizer: event['headers']['Authorization']
-        if event.get('type') == 'TOKEN':
-            authorization_header = event.get('authorizationToken', '')
-        else:
-            authorization_header = event.get('headers', {}).get('Authorization') or \
-                                  event.get('headers', {}).get('authorization')
+        # 1. Intentar obtener de queryStringParameters (WebSockets)
+        query_params = event.get('queryStringParameters') or {}
+        token = query_params.get('token')
         
-        token = extract_token_from_header(authorization_header)
+        # 2. Si no hay, intentar headers (HTTP / REST)
+        if not token:
+            if event.get('type') == 'TOKEN':
+                authorization_header = event.get('authorizationToken', '')
+            else:
+                authorization_header = event.get('headers', {}).get('Authorization') or \
+                                      event.get('headers', {}).get('authorization')
+            
+            if authorization_header:
+                token = extract_token_from_header(authorization_header)
+        
+        if not token:
+            raise Exception("No se encontró token de autorización")
         
         # Decodificar y validar token
         payload = decode_token(token)
@@ -48,7 +58,7 @@ def handler(event, context):
         # A:  arn:aws:execute-api:region:account:api-id/stage/*/*
         method_arn_parts = event['methodArn'].split('/')
         base_arn = '/'.join(method_arn_parts[:2])  # arn:aws:.../stage
-        wildcard_arn = f"{base_arn}/*/*"
+        wildcard_arn = f"{base_arn}/*"  # Allow all routes (HTTP methods and WS routes)
         
         policy = generate_policy(user_id, 'Allow', wildcard_arn, {
             'userId': user_id,
@@ -64,7 +74,7 @@ def handler(event, context):
         # Retornar Deny policy con wildcard
         method_arn_parts = event['methodArn'].split('/')
         base_arn = '/'.join(method_arn_parts[:2])
-        wildcard_arn = f"{base_arn}/*/*"
+        wildcard_arn = f"{base_arn}/*"
         return generate_policy('unauthorized', 'Deny', wildcard_arn)
 
 
