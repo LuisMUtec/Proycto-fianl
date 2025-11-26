@@ -66,7 +66,27 @@ def handler(event, context):
                     'code': 'FORBIDDEN'
                 })
             return create_product(event, auth['userId'], auth.get('tenantId'))
+        elif path.endswith('/availability') and http_method == 'PUT':
+            # Solo ADMIN puede cambiar disponibilidad (DEBE IR ANTES DE /menu/items/)
+            try:
+                require_role(auth, ['ADMIN'])
+            except AuthorizationError as e:
+                return build_response(403, {
+                    'message': str(e),
+                    'code': 'FORBIDDEN'
+                })
+            product_id = path.split('/')[-2]
+            print(f"[ProductoService] Path: {path}, Product ID extraído: {product_id}")
+            return update_availability(event, auth['userId'], product_id, auth.get('tenantId'))
         elif path.startswith('/menu/items/') and http_method == 'PUT':
+            # Solo ADMIN puede cambiar disponibilidad
+            try:
+                require_role(auth, ['ADMIN'])
+            except AuthorizationError as e:
+                return build_response(403, {
+                    'message': str(e),
+                    'code': 'FORBIDDEN'
+                })
             # Solo ADMIN puede actualizar productos
             try:
                 require_role(auth, ['ADMIN'])
@@ -77,17 +97,6 @@ def handler(event, context):
                 })
             product_id = path.split('/')[-1]
             return update_product(event, auth['userId'], product_id, auth.get('tenantId'))
-        elif path.endswith('/availability') and http_method == 'PUT':
-            # Solo ADMIN puede cambiar disponibilidad
-            try:
-                require_role(auth, ['ADMIN'])
-            except AuthorizationError as e:
-                return build_response(403, {
-                    'message': str(e),
-                    'code': 'FORBIDDEN'
-                })
-            product_id = path.split('/')[-2]
-            return update_availability(event, auth['userId'], product_id, auth.get('tenantId'))
         else:
             return build_response(404, {
                 'message': 'Ruta no encontrada',
@@ -348,7 +357,9 @@ def update_availability(event, user_id, product_id, tenant_id):
             })
         
         # Verificar que el producto existe
+        print(f"[ProductoService] Buscando producto con productId: {product_id}")
         response = products_table.get_item(Key={'productId': product_id})
+        print(f"[ProductoService] Respuesta DynamoDB: {response}")
         if 'Item' not in response:
             return build_response(404, {
                 'message': 'Producto no encontrado',
