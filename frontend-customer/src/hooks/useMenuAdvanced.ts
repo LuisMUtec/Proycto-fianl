@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { MenuItem, ProductApi } from '../lib/menu.types';
 import { fetchFood, fetchFoodByCategory, searchProducts, fetchCategories } from '../services/food';
+import { useTenant } from '../contexts/TenantContext';
 
 interface UseMenuAdvancedOptions {
   initialCategory?: string;
@@ -9,6 +10,7 @@ interface UseMenuAdvancedOptions {
 
 export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
   const { initialCategory, autoLoad = true } = options;
+  const { tenantId } = useTenant(); // Obtener el tenant seleccionado
 
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; count: number }>>([]);
@@ -26,6 +28,7 @@ export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
     category: p.category,
     image_url: p.imageUrl,
     available: p.isAvailable, // Backend usa isAvailable
+    tenant_id: p.tenant_id, // Mantener el tenant_id
   });
 
   // Cargar categorías
@@ -48,7 +51,7 @@ export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
     }
   }, []);
 
-  // Cargar productos
+  // Cargar productos - filtrar por tenant_id seleccionado
   const loadItems = useCallback(async (category?: string, query?: string) => {
     setLoading(true);
     setError(null);
@@ -69,7 +72,11 @@ export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
         products = data.products || [];
       }
 
-      const mapped = products.map(mapProduct);
+      // Filtrar productos por tenant_id seleccionado
+      const filteredProducts = products.filter(p => p.tenant_id === tenantId);
+      console.log(`🏪 Filtrando productos por tenant: ${tenantId} (${filteredProducts.length}/${products.length})`);
+
+      const mapped = filteredProducts.map(mapProduct);
       setItems(mapped);
     } catch (err: any) {
       console.error('Error loading items:', err);
@@ -78,7 +85,7 @@ export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tenantId]);
 
   // Cambiar categoría
   const changeCategory = useCallback((category: string) => {
@@ -105,13 +112,13 @@ export function useMenuAdvanced(options: UseMenuAdvancedOptions = {}) {
     loadItems(selectedCategory, searchQuery);
   }, [selectedCategory, searchQuery, loadItems]);
 
-  // Cargar inicial
+  // Cargar inicial y cuando cambie el tenant
   useEffect(() => {
     if (autoLoad) {
       loadCategories();
       loadItems(initialCategory);
     }
-  }, [autoLoad, initialCategory, loadCategories, loadItems]);
+  }, [autoLoad, initialCategory, loadCategories, loadItems, tenantId]); // Recargar cuando cambie tenantId
 
   return {
     items,

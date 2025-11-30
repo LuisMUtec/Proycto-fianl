@@ -1,6 +1,15 @@
 /**
  * Servicio de WebSocket - Notificaciones en tiempo real
  * Conexión automática con manejo de reconexión
+ *
+ * Formato del backend (handleOrderStatusChange.js):
+ * {
+ *   type: 'ORDER_STATUS_UPDATE',
+ *   data: {
+ *     orderId, previousStatus, newStatus, timestamp, message,
+ *     driverLocation, updatedBy
+ *   }
+ * }
  */
 
 import API_ENDPOINTS from '../config/api-endpoints';
@@ -13,8 +22,28 @@ export type NotificationType =
   | 'ORDER_READY'
   | 'ORDER_CANCELLED';
 
+// Datos dentro del campo 'data' del mensaje del backend
+export interface OrderStatusData {
+  orderId: string;
+  previousStatus?: string;
+  newStatus: string;
+  timestamp?: string;
+  message?: string;
+  driverLocation?: {
+    lat: number;
+    lng: number;
+  } | null;
+  updatedBy?: {
+    role: string;
+    email: string;
+  } | null;
+}
+
 export interface WebSocketNotification {
   type: NotificationType;
+  // El backend envía los datos en 'data'
+  data?: OrderStatusData;
+  // Campos normalizados para uso en componentes
   orderId?: string;
   status?: string;
   message?: string;
@@ -47,7 +76,7 @@ class WebSocketService {
    */
   connect(token: string): void {
     if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
-      console.log('🔌 WebSocket ya está conectado o conectándose');
+      console.log('WebSocket ya está conectado o conectándose');
       return;
     }
 
@@ -55,33 +84,36 @@ class WebSocketService {
     this.isConnecting = true;
 
     try {
-      // Construir URL con token
-      // Usar encodeURIComponent para manejar caracteres especiales en el JWT
       const wsUrl = `${API_ENDPOINTS.WEBSOCKET}?token=${encodeURIComponent(token)}`;
-      console.log('🔌 Conectando a WebSocket...');
-      console.log('🔌 URL base:', API_ENDPOINTS.WEBSOCKET);
-      console.log('🔌 Token length:', token.length);
+      console.log('Conectando a WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket conectado exitosamente');
+        console.log('✅ WebSocket conectado');
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-        
-        // Notificar a los handlers que estamos conectados
-        this.handlers.forEach(handler => {
-          try {
-            handler({ type: 'ORDER_STATUS_UPDATE', message: 'Conectado a notificaciones en tiempo real' });
-          } catch (e) {}
-        });
       };
 
       this.ws.onmessage = (event) => {
         try {
-          console.log('📨 WebSocket mensaje raw:', event.data);
-          const notification = JSON.parse(event.data) as WebSocketNotification;
-          console.log('📨 Notificación parseada:', notification);
+          const raw = JSON.parse(event.data);
+          console.log('📨 Mensaje WebSocket recibido:', raw);
+
+          // Normalizar: el backend envía { type, data: {...} }
+          // Extraer datos del campo 'data' para facilitar uso en componentes
+          const notification: WebSocketNotification = {
+            type: raw.type,
+            data: raw.data,
+            // Campos normalizados desde 'data'
+            orderId: raw.data?.orderId || raw.orderId,
+            status: raw.data?.newStatus || raw.data?.status || raw.status,
+            message: raw.data?.message || raw.message,
+            timestamp: raw.data?.timestamp || raw.timestamp,
+            location: raw.data?.driverLocation || raw.location,
+          };
+
+          console.log('📨 Notificación normalizada:', notification);
 
           // Notificar a todos los handlers
           this.handlers.forEach(handler => {
@@ -92,17 +124,17 @@ class WebSocketService {
             }
           });
         } catch (error) {
-          console.error('Error parseando notificación:', error, 'Raw:', event.data);
+          console.error('Error parseando notificación:', error, event.data);
         }
       };
 
       this.ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
+        console.error('❌ Error WebSocket:', error);
         this.isConnecting = false;
       };
 
-      this.ws.onclose = (event) => {
-        console.log('🔌 WebSocket cerrado. Code:', event.code, 'Reason:', event.reason);
+      this.ws.onclose = () => {
+        console.log('WebSocket desconectado');
         this.isConnecting = false;
         this.ws = null;
 
@@ -110,18 +142,16 @@ class WebSocketService {
         if (this.reconnectAttempts < this.maxReconnectAttempts && this.token) {
           this.reconnectAttempts++;
           const delay = this.reconnectDelay * this.reconnectAttempts;
-          console.log(`🔄 Reintentando conexión en ${delay}ms (intento ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+          console.log(`Reintentando conexión en ${delay}ms (intento ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
           setTimeout(() => {
             if (this.token) {
               this.connect(this.token);
             }
           }, delay);
-        } else {
-          console.log('❌ Se alcanzó el máximo de reconexiones o no hay token');
         }
       };
     } catch (error) {
-      console.error('❌ Error creando WebSocket:', error);
+      console.error('Error creando WebSocket:', error);
       this.isConnecting = false;
     }
   }
@@ -171,6 +201,34 @@ class WebSocketService {
     } else {
       console.warn('WebSocket no está conectado');
     }
+  }
+
+  /**
+   * Simular una notificación local (para cuando el backend no envía eventos)
+   * Útil cuando createOrder no dispara evento a EventBridge
+   */
+  simulateNotification(rawMessage: any): void {
+    console.log('📨 Simulando notificación local:', rawMessage);
+
+    // Normalizar el mensaje igual que si viniera del servidor
+    const notification: WebSocketNotification = {
+      type: rawMessage.type || 'ORDER_STATUS_UPDATE',
+      data: rawMessage.data,
+      orderId: rawMessage.data?.orderId || rawMessage.orderId,
+      status: rawMessage.data?.newStatus || rawMessage.data?.status || rawMessage.status,
+      message: rawMessage.data?.message || rawMessage.message,
+      timestamp: rawMessage.data?.timestamp || rawMessage.timestamp || new Date().toISOString(),
+      location: rawMessage.data?.driverLocation || rawMessage.location,
+    };
+
+    // Notificar a todos los handlers
+    this.handlers.forEach(handler => {
+      try {
+        handler(notification);
+      } catch (error) {
+        console.error('Error en handler de notificación:', error);
+      }
+    });
   }
 }
 

@@ -51,6 +51,8 @@ export async function login(credentials: { email: string; password: string }): P
 
 /**
  * POST /auth/register - Registrar nuevo cliente
+ * NOTA: El rol siempre es "cliente" para este frontend
+ * El tenant_id es "CLIENTE" para evitar error de índice GSI
  */
 export async function register(data: {
   email: string;
@@ -67,6 +69,8 @@ export async function register(data: {
     lastName: data.lastName,
     phoneNumber: data.phoneNumber,
     address: data.address,
+    role: 'cliente',
+    tenant_id: 'CLIENTE', // Requerido por el índice GSI del backend
   }, false);
 }
 

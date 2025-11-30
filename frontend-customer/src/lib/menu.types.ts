@@ -27,6 +27,7 @@ export interface MenuItem {
   category: string;
   image_url?: string;
   available: boolean;
+  tenant_id?: string;
 }
 
 // Response types for API endpoints

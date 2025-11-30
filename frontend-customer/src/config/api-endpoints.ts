@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
   // WebSocket Service (Notificaciones en tiempo real)
   WEBSOCKET: useLocal && isDevelopment
     ? import.meta.env.VITE_WS_URL_LOCAL
-    : import.meta.env.VITE_WS_URL || 'wss://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev',
+    : import.meta.env.VITE_WS_URL || 'wss://m4mwqz1lm5.execute-api.us-east-1.amazonaws.com/dev',
 } as const;
 
 // Validar que las URLs estén configuradas

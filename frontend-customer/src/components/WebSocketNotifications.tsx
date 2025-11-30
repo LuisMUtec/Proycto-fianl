@@ -15,16 +15,19 @@ export function WebSocketNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const { isConnected, lastMessage } = useWebSocket({
+  const { isConnected } = useWebSocket({
     onMessage: (message) => {
-      // Agregar notificación
+      // El mensaje ya viene normalizado desde websocket.ts
+      // Extraer datos del campo 'data' si existe, o usar campos directos
+      const data = message.data || message;
+
       const notification: Notification = {
         id: `${Date.now()}-${Math.random()}`,
-        type: message.type,
-        message: message.message,
-        orderId: message.orderId,
-        status: message.status,
-        timestamp: message.timestamp,
+        type: message.type || 'ORDER_STATUS_UPDATE',
+        message: data.message || message.message || 'Estado de pedido actualizado',
+        orderId: data.orderId || message.orderId || '',
+        status: data.newStatus || data.status || message.status || 'UNKNOWN',
+        timestamp: data.timestamp || message.timestamp || new Date().toISOString(),
       };
 
       setNotifications(prev => [notification, ...prev].slice(0, 10)); // Mantener solo las últimas 10
@@ -98,25 +101,14 @@ export function WebSocketNotifications() {
               <p className="text-xs text-gray-500 mt-1">
                 {isConnected ? (
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                     Conectado en tiempo real
                   </span>
                 ) : (
-                  <button
-                    onClick={() => {
-                      const token = localStorage.getItem('auth_token');
-                      if (token) {
-                        console.log('🔄 Intentando reconectar WebSocket...');
-                        import('../services/websocket').then(({ default: ws }) => {
-                          ws.connect(token);
-                        });
-                      }
-                    }}
-                    className="flex items-center gap-1 text-red-500 hover:text-red-700"
-                  >
+                  <span className="flex items-center gap-1">
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                    Desconectado - Click para reconectar
-                  </button>
+                    Desconectado
+                  </span>
                 )}
               </p>
             </div>
@@ -132,20 +124,7 @@ export function WebSocketNotifications() {
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Bell size={48} className="mx-auto mb-2 text-gray-300" />
-                <p className="mb-2">No tienes notificaciones</p>
-                {!isConnected && (
-                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-left">
-                    <p className="text-xs text-yellow-700 mb-2">
-                      ⚠️ Las notificaciones en tiempo real no están disponibles.
-                    </p>
-                    <a 
-                      href="/orders" 
-                      className="text-xs text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Ver mis pedidos →
-                    </a>
-                  </div>
-                )}
+                <p>No tienes notificaciones</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">

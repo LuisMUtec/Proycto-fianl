@@ -3,7 +3,7 @@
  * Se conecta automáticamente cuando el usuario inicia sesión
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import webSocketService, { WebSocketNotification } from '../services/websocket';
 
@@ -17,18 +17,16 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [lastNotification, setLastNotification] = useState<WebSocketNotification | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { onMessage, autoConnect = true } = options;
-  const connectionAttempted = useRef(false);
 
-  // Verificar estado de conexión periódicamente
+  // Verificar estado de conexión
   useEffect(() => {
     const checkConnection = () => {
       const connected = webSocketService.isConnected();
       setIsConnected(connected);
     };
 
-    // Verificar inmediatamente y cada 2 segundos
-    checkConnection();
-    const interval = setInterval(checkConnection, 2000);
+    // Verificar cada segundo
+    const interval = setInterval(checkConnection, 1000);
 
     return () => {
       clearInterval(interval);
@@ -38,7 +36,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   // Registrar handler para notificaciones
   useEffect(() => {
     const unsubscribe = webSocketService.onNotification((notification) => {
-      console.log('🔔 useWebSocket recibió notificación:', notification);
       setLastNotification(notification);
       onMessage?.(notification);
     });
@@ -48,38 +45,20 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     };
   }, [onMessage]);
 
-  // Conectar automáticamente cuando hay usuario logueado
+  // Conectar automáticamente cuando hay usuario
   useEffect(() => {
-    if (autoConnect && user && profile && !connectionAttempted.current) {
+    if (autoConnect && user && profile) {
       const token = localStorage.getItem('auth_token');
-      if (token) {
-        console.log('🔌 useWebSocket: Intentando conectar WebSocket...');
-        connectionAttempted.current = true;
-        
-        // Pequeño delay para asegurar que el componente esté montado
-        setTimeout(() => {
-          if (!webSocketService.isConnected()) {
-            webSocketService.connect(token);
-          }
-        }, 500);
+      if (token && !webSocketService.isConnected()) {
+        webSocketService.connect(token);
       }
     }
   }, [autoConnect, user, profile]);
 
-  // Reset connection attempt when user changes
-  useEffect(() => {
-    if (!user) {
-      connectionAttempted.current = false;
-    }
-  }, [user]);
-
   const connect = useCallback(() => {
     const token = localStorage.getItem('auth_token');
     if (token) {
-      console.log('🔌 useWebSocket: Conexión manual solicitada');
       webSocketService.connect(token);
-    } else {
-      console.warn('🔌 useWebSocket: No hay token para conectar');
     }
   }, []);
 
@@ -93,7 +72,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   return {
     isConnected,
-    lastMessage: lastNotification,
+    lastMessage: lastNotification, // Alias para compatibilidad
     lastNotification,
     connect,
     disconnect,

@@ -53,6 +53,10 @@ const router = createBrowserRouter([
             element: <CheckoutPage onNavigate={() => {}} />,
           },
           {
+            path: "orders",
+            element: <OrderTrackingPage />,
+          },
+          {
             path: "tracking",
             element: <OrderTrackingPage />,
           },

@@ -24,8 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userProfile);
           setProfile(userProfile);
 
-          // WebSocket se conectará cuando el usuario procese un pedido
-          console.log('📱 Sesión restaurada. WebSocket se conectará al procesar pedido.');
+          // Conectar WebSocket automáticamente
+          webSocketService.connect(token);
         } catch (error) {
           console.error('Error parsing saved user:', error);
           localStorage.removeItem('auth_token');
@@ -85,8 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userProfile);
       setProfile(userProfile);
 
-      // WebSocket se conectará cuando el usuario procese un pedido
-      console.log('📱 Registro exitoso. WebSocket se conectará al procesar pedido.');
+      // Conectar WebSocket
+      webSocketService.connect(result.token);
 
       return { error: null };
     } catch (error) {
@@ -106,9 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const result = await authService.login(credentials);
 
-      // Validar que solo clientes puedan acceder (el backend devuelve 'Cliente')
-      const userRole = result.user?.role || 'Cliente';
-      if (userRole !== 'Cliente') {
+      // Validar que solo clientes puedan acceder
+      const userRole = (result.user?.role || 'cliente').toLowerCase();
+      if (userRole !== 'cliente') {
         throw new Error('Esta aplicación es solo para clientes. Por favor, usa la aplicación administrativa.');
       }
 
@@ -125,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         apellido: userData.lastName || '',
         correo_electronico: userData.email,
         celular: userData.phoneNumber || '',
-        role: userRole as Role,
+        role: 'cliente' as Role, // Normalizar a minúscula
         activo: userData.status === 'ACTIVE',
         created_at: userData.createdAt || new Date().toISOString(),
       };
@@ -134,8 +134,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userProfile);
       setProfile(userProfile);
 
-      // WebSocket se conectará cuando el usuario procese un pedido
-      console.log('📱 Login exitoso. WebSocket se conectará al procesar pedido.');
+      // Conectar WebSocket
+      webSocketService.connect(result.token);
 
       return { error: null };
     } catch (error) {

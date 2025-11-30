@@ -6,6 +6,7 @@ interface CartItem {
   id: string;
   menu_item_id: string;
   quantity: number;
+  tenant_id?: string;
   menu_item: {
     id: string;
     name: string;
@@ -24,6 +25,7 @@ interface CartContextType {
   syncWithServer: () => Promise<void>;
   total: number;
   itemCount: number;
+  tenantId: string | null; // tenant_id del primer producto en el carrito
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -158,6 +160,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           id: `cart-${Date.now()}-${Math.random()}`,
           menu_item_id: productId,
           quantity,
+          tenant_id: menuItem.tenant_id, // Guardar tenant_id del producto
           menu_item: {
             id: productId,
             name: menuItem.name,
@@ -269,6 +272,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Obtener el tenant_id del primer producto en el carrito
+  const tenantId = cartItems.length > 0 ? cartItems[0].tenant_id || null : null;
+
   const value: CartContextType = {
     cartItems,
     loading,
@@ -279,6 +285,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     syncWithServer,
     total,
     itemCount,
+    tenantId,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

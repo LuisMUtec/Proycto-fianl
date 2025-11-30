@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, User, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../contexts/AuthContext';
+import { useTenant } from '../contexts/TenantContext';
 import * as ordersService from '../services/orders';
-import * as cartService from '../services/cart';
 import webSocketService from '../services/websocket';
 
 interface CheckoutPageProps {
@@ -15,6 +15,7 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
   const navigate = useNavigate();
   const { cartItems, total, clearCart, syncWithServer } = useCart();
   const { profile } = useAuth();
+  const { tenantId: selectedTenantId, tenantName } = useTenant(); // Usar tenant del contexto
   const [loading, setLoading] = useState(false);
 
   const handleNavigate = (path: string) => {
@@ -24,6 +25,14 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       navigate(`/${path}`);
     }
   };
+
+  // Redirigir si el carrito está vacío
+  useEffect(() => {
+    if (cartItems.length === 0 && !loading) {
+      console.log('🛒 Carrito vacío, redirigiendo a historial de pedidos...');
+      navigate('/orders');
+    }
+  }, [cartItems, loading, navigate]);
 
   const [formData, setFormData] = useState({
     name: profile?.nombre || '',
@@ -81,8 +90,11 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       }
 
       // PASO 2: Crear la orden
+      // Usar el tenant_id de la sede seleccionada
+      console.log('🏪 Usando tenant_id:', selectedTenantId, '-', tenantName);
+
       const orderData: any = {
-        tenant_id: 'TENANT#001', // Debe coincidir con el tenant_id de los productos
+        tenant_id: selectedTenantId,
         deliveryAddress: formData.orderType === 'delivery'
           ? formData.address
           : 'Recojo en tienda',
@@ -101,15 +113,6 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       const result = await ordersService.createOrder(orderData);
       console.log('✅ Orden creada:', result);
 
-      // PASO 3: Conectar WebSocket para recibir actualizaciones del pedido
-      console.log('🔌 Conectando WebSocket para notificaciones...');
-      try {
-        webSocketService.connect(token);
-        console.log('✅ WebSocket conectado');
-      } catch (wsError) {
-        console.warn('⚠️ No se pudo conectar WebSocket:', wsError);
-      }
-
       // Orden creada exitosamente
       const order = result.order;
       const payment = result.payment;
@@ -117,12 +120,29 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       const totalAmount = order?.total ? `S/ ${order.total.toFixed(2)}` : 'N/A';
       const orderStatus = order?.status || 'CREATED';
 
+      // Simular notificación local (el backend no envía evento OrderCreated a WebSocket)
+      // Esto permite que el usuario vea la notificación en el panel
+      if (order?.orderId) {
+        const localNotification = {
+          type: 'ORDER_STATUS_UPDATE',
+          data: {
+            orderId: order.orderId,
+            newStatus: 'CREATED',
+            previousStatus: null,
+            message: '¡Orden recibida! Estamos preparando tu pedido.',
+            timestamp: new Date().toISOString(),
+          }
+        };
+        // Disparar evento manual a los handlers del WebSocket
+        webSocketService.simulateNotification(localNotification);
+      }
+
       alert(`¡Pedido creado con éxito!\n\nID: #${orderIdShort}\nTotal: ${totalAmount}\nEstado: ${orderStatus}\nPago: ${payment?.status || 'Procesado'}\nTransacción: ${payment?.transactionId || 'N/A'}\n\n¡Tu pedido está siendo preparado!`);
 
       await clearCart();
 
-      // Redirigir al menú
-      handleNavigate('menu');
+      // Redirigir al historial de pedidos
+      handleNavigate('orders');
     } catch (error) {
       console.error('Error creating order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -132,9 +152,16 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
     }
   };
 
+  // Mostrar mensaje mientras redirige si carrito está vacío
   if (cartItems.length === 0) {
-    handleNavigate('cart');
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando historial de pedidos...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -155,36 +182,6 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Información de Entrega
               </h2>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de Pedido
-                </label>
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, orderType: 'delivery' })}
-                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                      formData.orderType === 'delivery'
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Delivery
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, orderType: 'pickup' })}
-                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                      formData.orderType === 'pickup'
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Recoger en Tienda
-                  </button>
-                </div>
-              </div>
 
               <div className="space-y-4">
                 <div>
@@ -215,22 +212,20 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                   />
                 </div>
 
-                {formData.orderType === 'delivery' && (
-                  <div>
-                    <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                      <MapPin size={16} />
-                      <span>Dirección de Entrega</span>
-                    </label>
-                    <textarea
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                      rows={3}
-                      required
-                      placeholder="Calle, número, distrito, referencias..."
-                    />
-                  </div>
-                )}
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
+                    <MapPin size={16} />
+                    <span>Dirección de Entrega</span>
+                  </label>
+                  <textarea
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                    rows={3}
+                    required
+                    placeholder="Calle, número, distrito, referencias..."
+                  />
+                </div>
 
                 <div>
                   <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
@@ -281,16 +276,14 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                   <span>Subtotal</span>
                   <span>S/ {total.toFixed(2)}</span>
                 </div>
-                {formData.orderType === 'delivery' && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery</span>
-                    <span>S/ 5.00</span>
-                  </div>
-                )}
+                <div className="flex justify-between text-gray-600">
+                  <span>Delivery</span>
+                  <span>S/ 5.00</span>
+                </div>
                 <div className="border-t pt-2 flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
                   <span>
-                    S/ {(total + (formData.orderType === 'delivery' ? 5 : 0)).toFixed(2)}
+                    S/ {(total + 5).toFixed(2)}
                   </span>
                 </div>
               </div>
