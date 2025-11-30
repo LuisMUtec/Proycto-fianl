@@ -1,0 +1,21 @@
+{
+  "name": "fridays-stepfunctions-service",
+  "version": "1.0.0",
+  "description": "Step Functions service for order workflow",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1691.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-step-functions": "^3.19.0",
+    "serverless-offline": "^13.3.0"
+  },
+  "keywords": ["serverless", "stepfunctions", "aws"],
+  "author": "Fridays Peru Team",
+  "license": "MIT"
+}

@@ -1,0 +1,132 @@
+service: fridays-websocket-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    WS_CONNECTIONS_TABLE: WSConnections-${self:provider.stage}
+    WS_API_ENDPOINT: https://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev
+    WEBSOCKET_ENDPOINT: https://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev
+    EVENT_BUS_NAME: fridays-event-bus-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  authorizer:
+    handler: shared/auth/authorizer.handler
+
+  onConnect:
+    handler: functions/connection/onConnect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  onDisconnect:
+    handler: functions/connection/onDisconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  handleOrderStatusChange:
+    handler: functions/events/handleOrderStatusChange.handler
+    events:
+      - eventBridge:
+          eventBus: fridays-event-bus-${self:provider.stage}
+          pattern:
+            source:
+              - fridays.orders
+              - fridays.kitchen
+              - fridays.delivery
+            detail-type:
+              - OrderCreated
+              - OrderStatusChanged
+
+  # ============================================================================
+  # FUNCIONES ADICIONALES - WEBSOCKET
+  # ============================================================================
+  sendMessage:
+    handler: functions/messages/sendMessage.handler
+    events:
+      - http:
+          path: /ws/notify
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getAllConnections:
+    handler: functions/connection/getAllConnections.handler
+    events:
+      - http:
+          path: /ws/connections
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getConnection:
+    handler: functions/connection/getConnection.handler
+    events:
+      - http:
+          path: /ws/connections/{connectionId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteConnection:
+    handler: functions/connection/deleteConnection.handler
+    events:
+      - http:
+          path: /ws/connections/{connectionId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+resources:
+  Resources:
+    WSConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: WSConnections-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: tenant_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: tenant-index
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-offline

@@ -1,16 +1,17 @@
 export interface ProductApi {
-  imageUrl: string;
-  available: boolean;
-  updatedAt: string;
-  tenantId: string;
-  category: string;
-  createdAt: string;
-  price: number;
-  description: string;
-  ingredients?: string[];
-  name: string;
-  preparationTime?: number;
   productId: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl?: string;
+  isAvailable: boolean;  // Backend usa isAvailable, NO available
+  preparationTime?: number;
+  ingredients?: string[];
+  tags?: string[];
+  tenant_id?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface FoodResponse {
@@ -26,4 +27,28 @@ export interface MenuItem {
   category: string;
   image_url?: string;
   available: boolean;
+}
+
+// Response types for API endpoints
+export interface MenuResponse {
+  products: ProductApi[];
+  page: number;
+  limit: number;
+}
+
+export interface CategoryResponse {
+  category: string;
+  products: ProductApi[];
+  count: number;
+}
+
+export interface SearchResponse {
+  query: string;
+  results: number;  // Esto es el COUNT, no los productos
+  products: ProductApi[];  // Los productos están aquí
+}
+
+// El backend devuelve un array simple de strings para categorías
+export interface CategoriesResponse {
+  categories: string[];  // Backend devuelve ["hamburguesas", "bebidas", ...]
 }

@@ -1,0 +1,18 @@
+{
+  "name": "fridays-websocket-service",
+  "version": "1.0.0",
+  "description": "WebSocket Service - Fridays Perú",
+  "main": "handler.js",
+  "scripts": {
+    "dev": "echo 'WebSocket service requires AWS deployment'",
+    "deploy": "serverless deploy --stage dev --aws-profile fridays-dev",
+    "logs": "serverless logs --stage dev --aws-profile fridays-dev --tail",
+    "remove": "serverless remove --stage dev --aws-profile fridays-dev"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1492.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.0.0"
+  }
+}

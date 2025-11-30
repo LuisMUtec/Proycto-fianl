@@ -1,0 +1,264 @@
+service: fridays-admin-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    USERS_TABLE: Users-${self:provider.stage}
+    SEDES_TABLE: Sedes-${self:provider.stage}
+    TENANTS_TABLE: Tenants-${self:provider.stage}
+    PRODUCTS_TABLE: Products-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  authorizer:
+    handler: shared/auth/authorizer.handler
+
+  # Dashboard
+  getDashboard:
+    handler: functions/dashboard/getDashboard.handler
+    events:
+      - http:
+          path: /admin/dashboard
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # Orders
+  getOrdersToday:
+    handler: functions/orders/getOrdersToday.handler
+    events:
+      - http:
+          path: /admin/orders/today
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # Sedes
+  listSedes:
+    handler: functions/sedes/listSedes.handler
+    events:
+      - http:
+          path: /admin/sedes
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  createSede:
+    handler: functions/sedes/createSede.handler
+    events:
+      - http:
+          path: /admin/sedes
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # Users
+  listUsers:
+    handler: functions/users/listUsers.handler
+    events:
+      - http:
+          path: /admin/users
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  createUser:
+    handler: functions/users/createUser.handler
+    events:
+      - http:
+          path: /admin/users
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # ============================================================================
+  # NUEVAS FUNCIONES AGREGADAS - ADMIN
+  # ============================================================================
+  getSede:
+    handler: functions/sedes/getSede.handler
+    events:
+      - http:
+          path: /admin/sedes/{tenant_id}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateSede:
+    handler: functions/sedes/updateSede.handler
+    events:
+      - http:
+          path: /admin/sedes/{tenant_id}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteSede:
+    handler: functions/sedes/deleteSede.handler
+    events:
+      - http:
+          path: /admin/sedes/{tenant_id}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getUser:
+    handler: functions/users/getUser.handler
+    events:
+      - http:
+          path: /admin/users/{userId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateUser:
+    handler: functions/users/updateUser.handler
+    events:
+      - http:
+          path: /admin/users/{userId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteUser:
+    handler: functions/users/deleteUser.handler
+    events:
+      - http:
+          path: /admin/users/{userId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  listAdminProducts:
+    handler: functions/products/listProducts.handler
+    events:
+      - http:
+          path: /admin/products
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  createAdminProduct:
+    handler: functions/products/createProduct.handler
+    events:
+      - http:
+          path: /admin/products
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getAdminProduct:
+    handler: functions/products/getProduct.handler
+    events:
+      - http:
+          path: /admin/products/{productId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateAdminProduct:
+    handler: functions/products/updateProduct.handler
+    events:
+      - http:
+          path: /admin/products/{productId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteAdminProduct:
+    handler: functions/products/deleteProduct.handler
+    events:
+      - http:
+          path: /admin/products/{productId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  kitchenMetrics:
+    handler: functions/metrics/kitchenMetrics.handler
+    events:
+      - http:
+          path: /admin/kitchen/metrics
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  financesDaily:
+    handler: functions/finances/financesDaily.handler
+    events:
+      - http:
+          path: /admin/finances/daily
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  financesMonthly:
+    handler: functions/finances/financesMonthly.handler
+    events:
+      - http:
+          path: /admin/finances/monthly
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+plugins:
+  - serverless-offline

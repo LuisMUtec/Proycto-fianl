@@ -1,0 +1,51 @@
+service: fridays-stepfunctions-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    PRODUCTS_TABLE: Products-${self:provider.stage}
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    SQS_ORDER_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/085179068256/fridays-order-queue-${self:provider.stage}.fifo
+    SNS_NOTIFICATIONS_TOPIC_ARN: arn:aws:sns:us-east-1:085179068256:fridays-notifications-${self:provider.stage}
+    EVENT_BUS_NAME: fridays-event-bus-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  prepareOrderData:
+    handler: functions/order-workflow/prepareOrderData.handler
+
+  persistBuildOrder:
+    handler: functions/order-workflow/persistBuildOrder.handler
+
+  publishOrderCreated:
+    handler: functions/order-workflow/publishOrderCreated.handler
+
+stepFunctions:
+  stateMachines:
+    orderWorkflow:
+      name: FridaysOrderWorkflow-${self:provider.stage}
+      definition: ${file(state-machines/order-workflow.asl.json)}
+      role: arn:aws:iam::085179068256:role/LabRole
+
+plugins:
+  - serverless-step-functions
+  - serverless-offline

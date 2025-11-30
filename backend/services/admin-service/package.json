@@ -1,0 +1,24 @@
+{
+  "name": "fridays-admin-service",
+  "version": "1.0.0",
+  "description": "Admin Service - Fridays Perú",
+  "main": "handler.js",
+  "scripts": {
+    "dev": "serverless offline start --stage local",
+    "deploy": "serverless deploy --stage dev --aws-profile fridays-dev --verbose",
+    "deploy:dev": "serverless deploy --stage dev --aws-profile fridays-dev --verbose",
+    "deploy:test": "serverless deploy --stage test --aws-profile fridays-test --verbose",
+    "deploy:prod": "serverless deploy --stage prod --aws-profile fridays-prod --verbose",
+    "logs": "serverless logs --stage dev --aws-profile fridays-dev --tail",
+    "remove": "serverless remove --stage dev --aws-profile fridays-dev"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1492.0",
+    "uuid": "^9.0.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.0.0"
+  }
+}

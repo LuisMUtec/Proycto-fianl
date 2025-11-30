@@ -1,0 +1,194 @@
+service: fridays-delivery-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    DRIVERS_TABLE: Drivers-${self:provider.stage}
+    EVENT_BUS_NAME: fridays-event-bus-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  authorizer:
+    handler: shared/auth/authorizer.handler
+
+  # Drivers
+  getAvailableDrivers:
+    handler: functions/drivers/getAvailable.handler
+    events:
+      - http:
+          path: /delivery/drivers/available
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  listDrivers:
+    handler: functions/drivers/listDrivers.handler
+    events:
+      - http:
+          path: /delivery/drivers
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  createDriver:
+    handler: functions/drivers/createDriver.handler
+    events:
+      - http:
+          path: /delivery/drivers
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # Orders
+  assignDriver:
+    handler: functions/orders/assignDriver.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}/assign
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateOrderStatus:
+    handler: functions/orders/updateStatus.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}/status
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getOrderTracking:
+    handler: functions/orders/getTracking.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}/tracking
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # ============================================================================
+  # NUEVAS FUNCIONES AGREGADAS - DELIVERY
+  # ============================================================================
+  createDeliveryRecord:
+    handler: functions/orders/createDeliveryRecord.handler
+    events:
+      - http:
+          path: /delivery/orders
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getDeliveryOrder:
+    handler: functions/orders/getOrder.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  listDeliveryOrders:
+    handler: functions/orders/listOrders.handler
+    events:
+      - http:
+          path: /delivery/orders
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteDeliveryOrder:
+    handler: functions/orders/deleteOrder.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getDriver:
+    handler: functions/drivers/getDriver.handler
+    events:
+      - http:
+          path: /delivery/drivers/{driverId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateDriver:
+    handler: functions/drivers/updateDriver.handler
+    events:
+      - http:
+          path: /delivery/drivers/{driverId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteDriver:
+    handler: functions/drivers/deleteDriver.handler
+    events:
+      - http:
+          path: /delivery/drivers/{driverId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  seedDrivers:
+    handler: functions/drivers/seedDrivers.handler
+    events:
+      - http:
+          path: /delivery/drivers/seed
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+plugins:
+  - serverless-offline

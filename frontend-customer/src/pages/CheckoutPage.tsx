@@ -3,6 +3,9 @@ import { MapPin, Phone, User, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../contexts/AuthContext';
+import * as ordersService from '../services/orders';
+import * as cartService from '../services/cart';
+import webSocketService from '../services/websocket';
 
 interface CheckoutPageProps {
   onNavigate?: (page: string) => void;
@@ -10,7 +13,7 @@ interface CheckoutPageProps {
 
 export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
   const navigate = useNavigate();
-  const { cartItems, total, clearCart } = useCart();
+  const { cartItems, total, clearCart, syncWithServer } = useCart();
   const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -44,48 +47,82 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       return;
     }
 
+    // Verificar que tenemos token de autenticación
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      alert('Sesión expirada. Por favor inicia sesión de nuevo.');
+      handleNavigate('auth/login');
+      return;
+    }
+
     setLoading(true);
 
-    try {
-      const token = localStorage.getItem('auth_token');
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    // Preparar items en formato del backend
+    const itemsForBackend = cartItems.map((item) => ({
+      productId: item.menu_item_id,
+      name: item.menu_item.name,
+      quantity: item.quantity,
+      price: item.menu_item.price,
+    }));
 
-      // Preparar datos según formato del backend
-      const orderData = {
-        items: cartItems.map((item) => ({
-          productId: item.menu_item_id,
-          quantity: item.quantity,
-          notes: '',
-        })),
-        notes: formData.notes || '',
+    try {
+      // PASO 1: Sincronizar carrito local con el servidor
+      console.log('🔄 Sincronizando carrito con el servidor...');
+      let syncSucceeded = false;
+      try {
+        await syncWithServer();
+        console.log('✅ Carrito sincronizado');
+        syncSucceeded = true;
+
+        // Pequeña espera para asegurar que DynamoDB procese
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } catch (syncError) {
+        console.warn('⚠️ Sync falló, enviaremos items directamente en la orden:', syncError);
+      }
+
+      // PASO 2: Crear la orden
+      const orderData: any = {
+        tenant_id: 'TENANT#001', // Debe coincidir con el tenant_id de los productos
+        deliveryAddress: formData.orderType === 'delivery'
+          ? formData.address
+          : 'Recojo en tienda',
         paymentMethod: 'CARD',
-        deliveryAddress: formData.orderType === 'delivery' ? formData.address : '',
+        notes: formData.notes || undefined,
       };
 
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderData),
-      });
+      // Si el sync falló, enviar items directamente (el backend los usará como respaldo)
+      if (!syncSucceeded) {
+        orderData.items = itemsForBackend;
+        console.log('📦 Enviando items directamente en la orden (sync falló)');
+      }
 
-      const result = await response.json();
+      console.log('📦 Creando orden:', orderData);
 
-      if (!response.ok) {
-        throw new Error(result.error || result.message || 'Error al crear la orden');
+      const result = await ordersService.createOrder(orderData);
+      console.log('✅ Orden creada:', result);
+
+      // PASO 3: Conectar WebSocket para recibir actualizaciones del pedido
+      console.log('🔌 Conectando WebSocket para notificaciones...');
+      try {
+        webSocketService.connect(token);
+        console.log('✅ WebSocket conectado');
+      } catch (wsError) {
+        console.warn('⚠️ No se pudo conectar WebSocket:', wsError);
       }
 
       // Orden creada exitosamente
-      const orderIdShort = result.orderId ? result.orderId.substring(0, 8) : 'N/A';
-      const totalAmount = result.total ? `$${result.total.toFixed(2)}` : 'N/A';
-      const orderStatus = result.status || 'CREATED';
+      const order = result.order;
+      const payment = result.payment;
+      const orderIdShort = order?.orderId ? order.orderId.substring(0, 8) : 'N/A';
+      const totalAmount = order?.total ? `S/ ${order.total.toFixed(2)}` : 'N/A';
+      const orderStatus = order?.status || 'CREATED';
 
-      alert(`¡Pedido creado con éxito!\n\nID: #${orderIdShort}\nTotal: ${totalAmount}\nEstado: ${orderStatus}`);
+      alert(`¡Pedido creado con éxito!\n\nID: #${orderIdShort}\nTotal: ${totalAmount}\nEstado: ${orderStatus}\nPago: ${payment?.status || 'Procesado'}\nTransacción: ${payment?.transactionId || 'N/A'}\n\n¡Tu pedido está siendo preparado!`);
 
       await clearCart();
-      handleNavigate('');
+
+      // Redirigir al menú
+      handleNavigate('menu');
     } catch (error) {
       console.error('Error creating order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';

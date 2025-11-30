@@ -1,0 +1,109 @@
+=== ENDPOINTS DE ecommerce-service ===
+endpoints:
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/auth/register
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/auth/login
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/auth/refresh-token
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/auth/logout
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/{category}
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/items/{itemId}
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/search
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/categories
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/users/orders
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders
+  PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}/cancel
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/sync
+  DELETE - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/payments/create-intent
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/payments/confirm
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/productos
+
+=== ENDPOINTS DE kitchen-service ===
+endpoints:
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/created
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/assign
+  PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/ready
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}
+  PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/status
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
+  PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
+  DELETE - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/seed
+functions:
+  authorizer: fridays-kitchen-service-dev-authorizer (18 MB)
+  getCreatedOrders: fridays-kitchen-service-dev-getCreatedOrders (18 MB)
+  assignOrder: fridays-kitchen-service-dev-assignOrder (18 MB)
+  updateOrder: fridays-kitchen-service-dev-updateOrder (18 MB)
+
+=== ENDPOINTS DE delivery-service ===
+endpoints:
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/available
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers
+  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers
+  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/assign
+  PUT - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/status
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/tracking
+  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders
+  DELETE - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
+  PUT - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
+  DELETE - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
+  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/seed
+functions:
+  authorizer: fridays-delivery-service-dev-authorizer (18 MB)
+  getAvailableDrivers: fridays-delivery-service-dev-getAvailableDrivers (18 MB)
+  listDrivers: fridays-delivery-service-dev-listDrivers (18 MB)
+  createDriver: fridays-delivery-service-dev-createDriver (18 MB)
+
+=== ENDPOINTS DE admin-service ===
+endpoints:
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/dashboard/{tenantId}
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/sedes
+  POST - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/sedes
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/users
+  POST - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/users
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/sedes/{sedeId}
+  PUT - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/sedes/{sedeId}
+  DELETE - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/sedes/{sedeId}
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/users/{userId}
+  PUT - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/users/{userId}
+  DELETE - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/users/{userId}
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/products
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/products/{productId}
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/kitchen/metrics
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/finances/daily
+  GET - https://f86cp89s8e.execute-api.us-east-1.amazonaws.com/dev/admin/finances/monthly
+functions:
+  authorizer: fridays-admin-service-dev-authorizer (18 MB)
+  getDashboard: fridays-admin-service-dev-getDashboard (18 MB)
+
+=== ENDPOINTS DE websocket-service ===
+endpoints:
+  POST - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/notify
+  GET - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections
+  GET - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
+  DELETE - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
+  wss://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev
+functions:
+  authorizer: fridays-websocket-service-dev-authorizer (18 MB)
+  onConnect: fridays-websocket-service-dev-onConnect (18 MB)
+  onDisconnect: fridays-websocket-service-dev-onDisconnect (18 MB)
+  handleOrderEvents: fridays-websocket-service-dev-handleOrderEvents (18 MB)
+  sendMessage: fridays-websocket-service-dev-sendMessage (18 MB)
+  getAllConnections: fridays-websocket-service-dev-getAllConnections (18 MB)
+  getConnection: fridays-websocket-service-dev-getConnection (18 MB)
+  deleteConnection: fridays-websocket-service-dev-deleteConnection (18 MB)
+
+=== ENDPOINTS DE stepfunctions-service ===
+
+=== ENDPOINTS DE workers-service ===
+

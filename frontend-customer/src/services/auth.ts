@@ -1,43 +1,87 @@
-import { loadEnv } from '@/utils/loaderEnv';
+/**
+ * Servicio de autenticación - E-Commerce Service
+ * Endpoints: /auth/register, /auth/login, /auth/refresh-token, /auth/logout
+ */
 
-const AUTH_URL = (() => {
-  try {
-    return loadEnv('AUTH_URL');
-  } catch {
-    return import.meta.env.VITE_API_URL_AUTH || '';
-  }
-})();
+import { ecommerceApi } from '../lib/api-client';
 
-export async function login(credentials: { email: string; password: string }) {
-  const res = await fetch(`${AUTH_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: credentials.email, password: credentials.password })
-  });
-
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || 'Login error');
-  return { token: json.token, user: json.user, message: json.message };
+export interface LoginResponse {
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    role: string;
+    status: string;
+    createdAt: string;
+  };
+  token: string;
+  message?: string;
 }
 
-export async function register(data: { firstName: string; lastName?: string; phoneNumber?: string; email: string; password: string; role?: string; address?: string }) {
-  const res = await fetch(`${AUTH_URL}/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: data.email,
-      password: data.password,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phoneNumber: data.phoneNumber,
-      role: data.role || 'USER',
-      address: data.address
-    })
-  });
-
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.message || 'Register error');
-  return { token: json.token, user: json.user, message: json.message };
+export interface RegisterResponse {
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    address?: string;
+    role: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  token: string;
+  message?: string;
 }
 
-export default { login, register };
+export interface RefreshTokenResponse {
+  token: string;
+  userId: string;
+}
+
+/**
+ * POST /auth/login - Iniciar sesión
+ */
+export async function login(credentials: { email: string; password: string }): Promise<LoginResponse> {
+  return await ecommerceApi.post<LoginResponse>('/auth/login', credentials, false);
+}
+
+/**
+ * POST /auth/register - Registrar nuevo cliente
+ */
+export async function register(data: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  address?: string;
+}): Promise<RegisterResponse> {
+  return await ecommerceApi.post<RegisterResponse>('/auth/register', {
+    email: data.email,
+    password: data.password,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    phoneNumber: data.phoneNumber,
+    address: data.address,
+  }, false);
+}
+
+/**
+ * POST /auth/refresh-token - Renovar token JWT
+ */
+export async function refreshToken(): Promise<RefreshTokenResponse> {
+  return await ecommerceApi.post<RefreshTokenResponse>('/auth/refresh-token', {}, true);
+}
+
+/**
+ * POST /auth/logout - Cerrar sesión
+ */
+export async function logout(): Promise<{ message: string }> {
+  return await ecommerceApi.post<{ message: string }>('/auth/logout', {}, true);
+}
+
+export default { login, register, refreshToken, logout };

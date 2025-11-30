@@ -1,0 +1,39 @@
+{
+  "Comment": "Order Workflow - Fridays Perú - Manual state changes via API",
+  "StartAt": "NotifyOrderCreated",
+  "States": {
+    "NotifyOrderCreated": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::events:putEvents",
+      "Parameters": {
+        "Entries": [
+          {
+            "Source": "fridays.orders",
+            "DetailType": "OrderCreated",
+            "Detail": {
+              "orderId.$": "$.orderId",
+              "tenant_id.$": "$.tenant_id",
+              "userId.$": "$.userId",
+              "status": "CREATED",
+              "total.$": "$.total",
+              "timestamp.$": "$.timestamp"
+            },
+            "EventBusName": "fridays-event-bus-dev"
+          }
+        ]
+      },
+      "End": true,
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "NotificationFailed"
+        }
+      ]
+    },
+    "NotificationFailed": {
+      "Type": "Pass",
+      "Result": "Failed to send notification, but order was created",
+      "End": true
+    }
+  }
+}

@@ -1,0 +1,194 @@
+service: fridays-kitchen-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    ORDERS_TABLE: Orders-${self:provider.stage}
+    CHEFS_TABLE: Chefs-${self:provider.stage}
+    EVENT_BUS_NAME: fridays-event-bus-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  authorizer:
+    handler: shared/auth/authorizer.handler
+
+  # Orders
+  getCreatedOrders:
+    handler: functions/orders/getCreated.handler
+    events:
+      - http:
+          path: /kitchen/orders/created
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  assignOrder:
+    handler: functions/orders/assignOrder.handler
+    events:
+      - http:
+          path: /kitchen/orders/{orderId}/assign
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateOrder:
+    handler: functions/orders/updateOrder.handler
+    events:
+      - http:
+          path: /kitchen/orders/{orderId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  markOrderReady:
+    handler: functions/orders/markReady.handler
+    events:
+      - http:
+          path: /kitchen/orders/{orderId}/ready
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # Chefs
+  listChefs:
+    handler: functions/chefs/listChefs.handler
+    events:
+      - http:
+          path: /kitchen/chefs
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  createChef:
+    handler: functions/chefs/createChef.handler
+    events:
+      - http:
+          path: /kitchen/chefs
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  # ============================================================================
+  # NUEVAS FUNCIONES AGREGADAS - KITCHEN
+  # ============================================================================
+  createOrderInKitchen:
+    handler: functions/orders/createOrderInKitchen.handler
+    events:
+      - http:
+          path: /kitchen/orders
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  listKitchenOrders:
+    handler: functions/orders/listOrders.handler
+    events:
+      - http:
+          path: /kitchen/orders
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getKitchenOrder:
+    handler: functions/orders/getOrder.handler
+    events:
+      - http:
+          path: /kitchen/orders/{orderId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  putOrderStatus:
+    handler: functions/orders/putStatus.handler
+    events:
+      - http:
+          path: /kitchen/orders/{orderId}/status
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  getChef:
+    handler: functions/chefs/getChef.handler
+    events:
+      - http:
+          path: /kitchen/chefs/{chefId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  updateChef:
+    handler: functions/chefs/updateChef.handler
+    events:
+      - http:
+          path: /kitchen/chefs/{chefId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteChef:
+    handler: functions/chefs/deleteChef.handler
+    events:
+      - http:
+          path: /kitchen/chefs/{chefId}
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  seedChefs:
+    handler: functions/chefs/seedChefs.handler
+    events:
+      - http:
+          path: /kitchen/chefs/seed
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+plugins:
+  - serverless-offline

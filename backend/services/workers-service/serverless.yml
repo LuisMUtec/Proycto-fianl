@@ -1,0 +1,86 @@
+service: fridays-workers-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  # ⚠️ AWS ACADEMY: Usar LabRole
+  iam:
+    role: arn:aws:iam::085179068256:role/LabRole
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: us-east-1
+    ORDERS_TABLE: Orders-${self:provider.stage}
+
+# Configurar empaquetado para incluir shared
+package:
+  patterns:
+    - 'functions/**'
+    - 'shared/**'
+    - '!shared/**/*.test.js'
+    - '!**/*.md'
+
+functions:
+  orderQueueWorker:
+    handler: functions/sqs-workers/orderQueueWorker.handler
+    events:
+      - sqs:
+          arn: !GetAtt FridaysOrderQueue.Arn
+          batchSize: 10
+
+resources:
+  Resources:
+    # Cola SQS FIFO para procesamiento de órdenes (orden garantizado)
+    FridaysOrderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: fridays-order-queue-${self:provider.stage}.fifo
+        FifoQueue: true  # ✅ FIFO habilitado
+        ContentBasedDeduplication: true  # Deduplicación automática por contenido
+        VisibilityTimeout: 300
+        MessageRetentionPeriod: 1209600  # 14 días
+        ReceiveMessageWaitTimeSeconds: 20  # Long polling
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage}
+          - Key: Service
+            Value: workers
+
+    # Topic SNS para notificaciones
+    FridaysNotificationsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: fridays-notifications-${self:provider.stage}
+        DisplayName: Fridays Peru Notifications
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage}
+          - Key: Service
+            Value: notifications
+
+  Outputs:
+    OrderQueueUrl:
+      Description: URL de la cola SQS de órdenes
+      Value: !Ref FridaysOrderQueue
+      Export:
+        Name: ${self:provider.stage}-OrderQueueUrl
+
+    OrderQueueArn:
+      Description: ARN de la cola SQS de órdenes
+      Value: !GetAtt FridaysOrderQueue.Arn
+      Export:
+        Name: ${self:provider.stage}-OrderQueueArn
+
+    NotificationsTopicArn:
+      Description: ARN del topic SNS de notificaciones
+      Value: !Ref FridaysNotificationsTopic
+      Export:
+        Name: ${self:provider.stage}-NotificationsTopicArn
+
+plugins:
+  - serverless-offline

@@ -1,0 +1,211 @@
+{
+	"info": {
+		"_postman_id": "fridays-delivery-003",
+		"name": "Fridays Perú - Delivery Service",
+		"description": "Colección para el servicio de Delivery\n\nIncluye:\n- DRIVERS (CRUD repartidores)\n- ORDERS (asignar, actualizar tracking)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://YOUR-DELIVERY-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🚗 DRIVERS",
+			"item": [
+				{
+					"name": "Create Driver",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Juan Mendoza\",\n  \"email\": \"juan@fridays.pe\",\n  \"phone\": \"987654321\",\n  \"vehicleType\": \"Moto\",\n  \"licensePlate\": \"ABC-123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers"]
+						}
+					}
+				},
+				{
+					"name": "List Drivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers"]
+						}
+					}
+				},
+				{
+					"name": "Get Driver",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/driver_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers", "driver_123"]
+						}
+					}
+				},
+				{
+					"name": "Get Available Drivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/available",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers", "available"]
+						},
+						"description": "Repartidores disponibles para asignación"
+					}
+				},
+				{
+					"name": "Update Driver",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"AVAILABLE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers/driver_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers", "driver_123"]
+						}
+					}
+				},
+				{
+					"name": "Delete Driver",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/driver_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["drivers", "driver_123"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📦 ORDERS",
+			"item": [
+				{
+					"name": "Assign Driver to Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"driverId\": \"driver_123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/assign-driver",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "ord_123", "assign-driver"]
+						}
+					}
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_TRANSIT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "ord_123", "status"]
+						},
+						"description": "Estados: READY_FOR_PICKUP, IN_TRANSIT, DELIVERED"
+					}
+				},
+				{
+					"name": "Get Order Tracking",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/tracking",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "ord_123", "tracking"]
+						},
+						"description": "Ver ubicación y estado del pedido"
+					}
+				},
+				{
+					"name": "Update Location",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": -12.0464,\n  \"longitude\": -77.0428\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/location",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "ord_123", "location"]
+						},
+						"description": "Actualizar ubicación GPS del repartidor"
+					}
+				}
+			]
+		}
+	]
+}

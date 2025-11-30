@@ -1,0 +1,94 @@
+{
+	"info": {
+		"_postman_id": "fridays-websocket-005",
+		"name": "Fridays Perú - WebSocket Service",
+		"description": "Colección para probar WebSocket (notificaciones en tiempo real)\n\n⚠️ NOTA: WebSocket requiere cliente especial.\nEsta colección incluye endpoints REST asociados.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "wsUrl",
+			"value": "wss://YOUR-WS-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "connectionId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "📡 WEBSOCKET INFO",
+			"item": [
+				{
+					"name": "WebSocket Connection URL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wsUrl}}",
+							"host": ["{{wsUrl}}"]
+						},
+						"description": "⚠️ Este es un endpoint WebSocket.\n\nPara conectar usa:\n\n**JavaScript:**\n```js\nconst ws = new WebSocket('{{wsUrl}}?token=YOUR_JWT_TOKEN');\n\nws.onopen = () => console.log('Conectado');\nws.onmessage = (event) => console.log('Mensaje:', event.data);\n```\n\n**Cliente CLI:**\n```bash\nwscat -c '{{wsUrl}}?token=YOUR_TOKEN'\n```"
+					}
+				}
+			]
+		},
+		{
+			"name": "📨 NOTIFICATIONS",
+			"item": [
+				{
+					"name": "Send Test Notification",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"sendMessage\",\n  \"message\": \"Test notification\",\n  \"userId\": \"user_123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wsUrl}}/@connections/{{connectionId}}",
+							"host": ["{{wsUrl}}"],
+							"path": ["@connections", "{{connectionId}}"]
+						},
+						"description": "Enviar notificación a conexión específica"
+					}
+				}
+			]
+		},
+		{
+			"name": "📋 TESTING GUIDE",
+			"item": [
+				{
+					"name": "Cómo probar WebSocket",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://example.com",
+							"protocol": "https",
+							"host": ["example", "com"]
+						},
+						"description": "## Opciones para probar WebSocket:\n\n### 1. Cliente JavaScript (Browser)\n```html\n<!DOCTYPE html>\n<html>\n<body>\n  <div id=\"messages\"></div>\n  <script>\n    const token = 'YOUR_JWT_TOKEN';\n    const ws = new WebSocket(`wss://YOUR-WS-ID.execute-api.us-east-1.amazonaws.com/dev?token=${token}`);\n    \n    ws.onopen = () => {\n      console.log('✅ Conectado a WebSocket');\n      document.getElementById('messages').innerHTML += '<p>Conectado</p>';\n    };\n    \n    ws.onmessage = (event) => {\n      console.log('📨 Mensaje:', event.data);\n      const data = JSON.parse(event.data);\n      document.getElementById('messages').innerHTML += `<p>${JSON.stringify(data)}</p>`;\n    };\n    \n    ws.onerror = (error) => {\n      console.error('❌ Error:', error);\n    };\n    \n    ws.onclose = () => {\n      console.log('🔌 Desconectado');\n    };\n  </script>\n</body>\n</html>\n```\n\n### 2. wscat (CLI)\n```bash\nnpm install -g wscat\nwscat -c 'wss://YOUR-WS-ID.execute-api.us-east-1.amazonaws.com/dev?token=YOUR_TOKEN'\n```\n\n### 3. Postman (Nueva versión)\nPostman v10+ soporta WebSocket:\n1. New → WebSocket Request\n2. URL: `{{wsUrl}}?token={{token}}`\n3. Connect\n4. Enviar mensajes JSON\n\n### 4. Browser Developer Tools\n```js\nconst ws = new WebSocket('wss://YOUR-WS-ID.execute-api.us-east-1.amazonaws.com/dev?token=YOUR_TOKEN');\nws.onmessage = (e) => console.log(JSON.parse(e.data));\n```"
+					}
+				}
+			]
+		}
+	]
+}

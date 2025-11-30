@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { AuthContextType } from '../interfaces/context/AuthContext';
 import type { UserProfile } from '../interfaces/user';
-import { loadEnv } from '../utils/loaderEnv';
+import type { Role } from '../interfaces/api/common';
+import * as authService from '../services/auth';
+import webSocketService from '../services/websocket';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const AUTH_URL = loadEnv('AUTH_URL');
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -22,6 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userProfile = JSON.parse(savedUser);
           setUser(userProfile);
           setProfile(userProfile);
+
+          // WebSocket se conectará cuando el usuario procese un pedido
+          console.log('📱 Sesión restaurada. WebSocket se conectará al procesar pedido.');
         } catch (error) {
           console.error('Error parsing saved user:', error);
           localStorage.removeItem('auth_token');
@@ -32,6 +36,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     checkSession();
+
+    // Cleanup: desconectar WebSocket al desmontar
+    return () => {
+      webSocketService.disconnect();
+    };
   }, []);
 
   const signUp = async (data: {
@@ -46,48 +55,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${AUTH_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName || '',
-          phoneNumber: data.phoneNumber || '',
-          address: data.address || '',
-        }),
+      const result = await authService.register({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName || '',
+        phoneNumber: data.phoneNumber,
+        address: data.address,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || result.message || 'Error al registrar usuario');
-      }
-
-      // El backend devuelve token y user directamente
+      // Guardar token
       if (result.token) {
         localStorage.setItem('auth_token', result.token);
       }
 
-      // Normalizar campos de usuario del backend
-      const userFromServer = result.user || {};
+      // Crear perfil de usuario desde la respuesta del backend
       const userProfile: UserProfile = {
-        id: userFromServer.userId || userFromServer.id,
-        nombre: userFromServer.firstName || userFromServer.nombre || userFromServer.name,
-        apellido: userFromServer.lastName || userFromServer.apellido || '',
-        correo_electronico: userFromServer.email || userFromServer.correo_electronico,
-        celular: userFromServer.phoneNumber || userFromServer.celular || userFromServer.phone || '',
-        role: (userFromServer.role || userFromServer.rol || 'USER').toUpperCase(),
-        activo: userFromServer.status === 'ACTIVE' ? true : (userFromServer.active ?? userFromServer.activo ?? true),
-        created_at: userFromServer.createdAt || userFromServer.created_at || new Date().toISOString(),
+        id: result.user.userId,
+        nombre: result.user.firstName,
+        apellido: result.user.lastName,
+        correo_electronico: result.user.email,
+        celular: result.user.phoneNumber || '',
+        role: result.user.role as Role,
+        activo: result.user.status === 'ACTIVE',
+        created_at: result.user.createdAt,
       };
 
       localStorage.setItem('user_profile', JSON.stringify(userProfile));
       setUser(userProfile);
       setProfile(userProfile);
+
+      // WebSocket se conectará cuando el usuario procese un pedido
+      console.log('📱 Registro exitoso. WebSocket se conectará al procesar pedido.');
 
       return { error: null };
     } catch (error) {
@@ -105,51 +104,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${AUTH_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: credentials.email,
-          password: credentials.password,
-        }),
-      });
+      const result = await authService.login(credentials);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || result.message || 'Credenciales inválidas');
+      // Validar que solo clientes puedan acceder (el backend devuelve 'Cliente')
+      const userRole = result.user?.role || 'Cliente';
+      if (userRole !== 'Cliente') {
+        throw new Error('Esta aplicación es solo para clientes. Por favor, usa la aplicación administrativa.');
       }
 
-      // Guardar token y perfil
+      // Guardar token
       if (result.token) {
         localStorage.setItem('auth_token', result.token);
       }
 
-      // Normalizar campos de usuario del backend
-      const userFromServer = result.user || {};
-      const userRole = (userFromServer.role || userFromServer.rol || 'USER').toUpperCase();
-      
-      // Validar que solo usuarios con rol USER puedan acceder a la app de clientes
-      if (userRole !== 'USER') {
-        throw new Error('Esta aplicación es solo para clientes. Por favor, usa la aplicación administrativa.');
-      }
-
+      // Crear perfil de usuario desde la respuesta del backend
+      const userData = result.user;
       const userProfile: UserProfile = {
-        id: userFromServer.userId || userFromServer.id,
-        nombre: userFromServer.firstName || userFromServer.nombre || userFromServer.name,
-        apellido: userFromServer.lastName || userFromServer.apellido || '',
-        correo_electronico: userFromServer.email || userFromServer.correo_electronico,
-        celular: userFromServer.phoneNumber || userFromServer.celular || userFromServer.phone || '',
-        role: userRole,
-        activo: userFromServer.status === 'ACTIVE' ? true : (userFromServer.active ?? userFromServer.activo ?? true),
-        created_at: userFromServer.createdAt || userFromServer.created_at || new Date().toISOString(),
+        id: userData.userId,
+        nombre: userData.firstName || userData.email.split('@')[0],
+        apellido: userData.lastName || '',
+        correo_electronico: userData.email,
+        celular: userData.phoneNumber || '',
+        role: userRole as Role,
+        activo: userData.status === 'ACTIVE',
+        created_at: userData.createdAt || new Date().toISOString(),
       };
 
       localStorage.setItem('user_profile', JSON.stringify(userProfile));
       setUser(userProfile);
       setProfile(userProfile);
+
+      // WebSocket se conectará cuando el usuario procese un pedido
+      console.log('📱 Login exitoso. WebSocket se conectará al procesar pedido.');
 
       return { error: null };
     } catch (error) {
@@ -163,6 +149,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
+
+      // Intentar cerrar sesión en el servidor
+      try {
+        await authService.logout();
+      } catch (error) {
+        console.error('Error logging out from server:', error);
+      }
+
+      // Desconectar WebSocket
+      webSocketService.disconnect();
 
       // Limpiar localStorage
       localStorage.removeItem('auth_token');

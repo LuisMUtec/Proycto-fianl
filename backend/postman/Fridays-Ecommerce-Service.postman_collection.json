@@ -1,0 +1,585 @@
+{
+	"info": {
+		"_postman_id": "fridays-ecommerce-001",
+		"name": "Fridays Perú - E-Commerce Service",
+		"description": "Colección completa para probar el servicio de E-Commerce\n\nIncluye:\n- AUTH (register, login, refresh, logout)\n- MENU (productos públicos)\n- ORDERS (crear, ver, cancelar)\n- CART (carrito)\n- PAYMENTS (pago simulado 1 click)\n- PRODUCTS ADMIN (CRUD productos)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 AUTH",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('token', response.token);",
+									"    pm.collectionVariables.set('token', response.token);",
+									"    console.log('Token guardado:', response.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cliente@test.com\",\n  \"password\": \"Test123!\",\n  \"name\": \"Cliente Test\",\n  \"role\": \"Cliente\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Registrar nuevo usuario (Cliente)"
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('token', response.token);",
+									"    pm.collectionVariables.set('token', response.token);",
+									"    console.log('✅ Login exitoso. Token guardado.');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cliente@test.com\",\n  \"password\": \"Test123!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login y obtener JWT token"
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh-token",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh-token"]
+						},
+						"description": "Refrescar token JWT"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🍔 MENU (Público)",
+			"item": [
+				{
+					"name": "Listar Productos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Ver menú completo (público, no requiere auth)"
+					}
+				},
+				{
+					"name": "Productos por Categoría",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/hamburguesas",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "hamburguesas"]
+						},
+						"description": "Filtrar por categoría (hamburguesas, bebidas, postres, etc)"
+					}
+				},
+				{
+					"name": "Ver Producto",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "items", "prod_123"]
+						}
+					}
+				},
+				{
+					"name": "Buscar Productos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/search?q=hamburguesa",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "hamburguesa"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Listar Categorías",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "categories"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🛒 CART",
+			"item": [
+				{
+					"name": "Add to Cart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"prod_123\",\n  \"quantity\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"prod_123\",\n  \"quantity\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"prod_123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📦 ORDERS",
+			"item": [
+				{
+					"name": "Create Order (Checkout)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('orderId', response.orderId);",
+									"    console.log('✅ Orden creada:', response.orderId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"productId\": \"prod_123\",\n      \"quantity\": 2,\n      \"price\": 25.50\n    },\n    {\n      \"productId\": \"prod_456\",\n      \"quantity\": 1,\n      \"price\": 12.00\n    }\n  ],\n  \"deliveryAddress\": \"Av. Siempre Viva 123, Lima\",\n  \"paymentMethod\": \"simulation\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders"]
+						},
+						"description": "Crear nueva orden desde el carrito"
+					}
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "{{orderId}}"]
+						}
+					}
+				},
+				{
+					"name": "My Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "orders"]
+						},
+						"description": "Ver mis órdenes (como cliente)"
+					}
+				},
+				{
+					"name": "List All Orders (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["orders", "{{orderId}}", "cancel"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💳 PAYMENTS (Simulado)",
+			"item": [
+				{
+					"name": "Pagar Orden (1 Click)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{orderId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/confirm",
+							"host": ["{{baseUrl}}"],
+							"path": ["payments", "confirm"]
+						},
+						"description": "⚠️ SIMULACIÓN DE PAGO\n\nSolo requiere orderId, no tarjeta.\n95% éxito, 5% falla (testing)."
+					}
+				},
+				{
+					"name": "Create Payment Intent (Opcional)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"amount\": 63.00,\n  \"currency\": \"PEN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/create-intent",
+							"host": ["{{baseUrl}}"],
+							"path": ["payments", "create-intent"]
+						},
+						"description": "Opcional en flujo simplificado"
+					}
+				}
+			]
+		},
+		{
+			"name": "⚙️ PRODUCTS ADMIN",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Hamburguesa Classic\",\n  \"description\": \"Hamburguesa con carne, lechuga, tomate\",\n  \"price\": 25.50,\n  \"category\": \"hamburguesas\",\n  \"imageUrl\": \"https://example.com/burger.jpg\",\n  \"available\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/menu/productos",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "productos"]
+						}
+					}
+				},
+				{
+					"name": "List Products (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/productos",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "productos"]
+						}
+					}
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Hamburguesa Classic Premium\",\n  \"price\": 28.50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "items", "prod_123"]
+						}
+					}
+				},
+				{
+					"name": "Update Availability",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"available\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123/availability",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "items", "prod_123", "availability"]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123",
+							"host": ["{{baseUrl}}"],
+							"path": ["menu", "items", "prod_123"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

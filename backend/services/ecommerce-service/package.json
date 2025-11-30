@@ -1,0 +1,24 @@
+{
+  "name": "fridays-ecommerce-service",
+  "version": "1.0.0",
+  "description": "Fridays Ecommerce Service - Productos, Carrito y Checkout",
+  "main": "index.js",
+  "scripts": {
+    "dev": "serverless offline start --stage local",
+    "deploy": "serverless deploy --stage dev --aws-profile fridays-dev --verbose",
+    "logs": "serverless logs -f listProducts --stage dev --tail --aws-profile fridays-dev",
+    "remove": "serverless remove --stage dev --aws-profile fridays-dev"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1492.0",
+    "uuid": "^9.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.3.0"
+  },
+  "keywords": ["serverless", "aws", "lambda", "ecommerce"],
+  "author": "Equipo Fridays Perú",
+  "license": "MIT"
+}

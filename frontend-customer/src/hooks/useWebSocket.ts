@@ -1,136 +1,104 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+/**
+ * Hook personalizado para manejar notificaciones WebSocket
+ * Se conecta automáticamente cuando el usuario inicia sesión
+ */
 
-interface WebSocketMessage {
-  type: 'ORDER_CREATED' | 'ORDER_STATUS_CHANGED';
-  orderId: string;
-  status: string;
-  message: string;
-  timestamp: string;
-  data?: any;
-}
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import webSocketService, { WebSocketNotification } from '../services/websocket';
 
 interface UseWebSocketOptions {
-  onMessage?: (message: WebSocketMessage) => void;
-  onError?: (error: Event) => void;
-  onOpen?: () => void;
-  onClose?: () => void;
+  onMessage?: (notification: WebSocketNotification) => void;
   autoConnect?: boolean;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const { user, profile } = useAuth();
+  const [lastNotification, setLastNotification] = useState<WebSocketNotification | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-  const { onMessage, onError, onOpen, onClose, autoConnect = true } = options;
+  const { onMessage, autoConnect = true } = options;
+  const connectionAttempted = useRef(false);
 
-  const connect = useCallback(() => {
-    if (!user || !profile) {
-      console.log('❌ No user logged in, skipping WebSocket connection');
-      return;
-    }
-
-    const WS_URL = import.meta.env.VITE_API_URL_WS ;
-    const TENANT_ID = import.meta.env.VITE_DEFAULT_TENANT_ID || 'sede-quito-001';
-
-    // Construir URL con query params
-    const userId = profile.id;
-    const role = (profile.role || 'USER').toString().toUpperCase();
-    const tenantId = role === 'USER' ? '' : TENANT_ID;
-
-    const wsUrl = `${WS_URL}?userId=${userId}&role=${role}${tenantId ? `&tenantId=${tenantId}` : ''}`;
-
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
-    console.log('🔑 WebSocket params:', { userId, role, tenantId });
-
-    try {
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        console.log('✅ WebSocket connected');
-        setIsConnected(true);
-        onOpen?.();
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data);
-          console.log('📬 WebSocket message received:', message);
-          setLastMessage(message);
-          onMessage?.(message);
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        setIsConnected(false);
-        onError?.(error);
-      };
-
-      ws.onclose = () => {
-        console.log('🔌 WebSocket disconnected');
-        setIsConnected(false);
-        wsRef.current = null;
-        onClose?.();
-
-        // Auto-reconnect after 5 seconds
-        if (autoConnect) {
-          console.log('🔄 Reconnecting in 5 seconds...');
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
-          }, 5000);
-        }
-      };
-
-      wsRef.current = ws;
-    } catch (error) {
-      console.error('Error creating WebSocket:', error);
-    }
-  }, [user, profile, onMessage, onError, onOpen, onClose, autoConnect]);
-
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-    }
-
-    if (wsRef.current) {
-      console.log('🔌 Manually disconnecting WebSocket');
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
-    setIsConnected(false);
-  }, []);
-
-  const sendMessage = useCallback((message: any) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
-      console.log('📤 Sent message:', message);
-    } else {
-      console.warn('⚠️ WebSocket not connected, cannot send message');
-    }
-  }, []);
-
-  // Auto-connect when user logs in
+  // Verificar estado de conexión periódicamente
   useEffect(() => {
-    if (autoConnect && user && profile) {
-      connect();
-    }
+    const checkConnection = () => {
+      const connected = webSocketService.isConnected();
+      setIsConnected(connected);
+    };
+
+    // Verificar inmediatamente y cada 2 segundos
+    checkConnection();
+    const interval = setInterval(checkConnection, 2000);
 
     return () => {
-      disconnect();
+      clearInterval(interval);
     };
-  }, [autoConnect, user, profile, connect, disconnect]);
+  }, []);
+
+  // Registrar handler para notificaciones
+  useEffect(() => {
+    const unsubscribe = webSocketService.onNotification((notification) => {
+      console.log('🔔 useWebSocket recibió notificación:', notification);
+      setLastNotification(notification);
+      onMessage?.(notification);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [onMessage]);
+
+  // Conectar automáticamente cuando hay usuario logueado
+  useEffect(() => {
+    if (autoConnect && user && profile && !connectionAttempted.current) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        console.log('🔌 useWebSocket: Intentando conectar WebSocket...');
+        connectionAttempted.current = true;
+        
+        // Pequeño delay para asegurar que el componente esté montado
+        setTimeout(() => {
+          if (!webSocketService.isConnected()) {
+            webSocketService.connect(token);
+          }
+        }, 500);
+      }
+    }
+  }, [autoConnect, user, profile]);
+
+  // Reset connection attempt when user changes
+  useEffect(() => {
+    if (!user) {
+      connectionAttempted.current = false;
+    }
+  }, [user]);
+
+  const connect = useCallback(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      console.log('🔌 useWebSocket: Conexión manual solicitada');
+      webSocketService.connect(token);
+    } else {
+      console.warn('🔌 useWebSocket: No hay token para conectar');
+    }
+  }, []);
+
+  const disconnect = useCallback(() => {
+    webSocketService.disconnect();
+  }, []);
+
+  const sendMessage = useCallback((data: any) => {
+    webSocketService.send(data);
+  }, []);
 
   return {
     isConnected,
-    lastMessage,
+    lastMessage: lastNotification,
+    lastNotification,
     connect,
     disconnect,
     sendMessage,
   };
 }
+
+export default useWebSocket;

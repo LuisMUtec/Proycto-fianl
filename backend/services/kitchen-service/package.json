@@ -1,0 +1,19 @@
+{
+  "name": "fridays-kitchen-service",
+  "version": "1.0.0",
+  "description": "Servicio de gestión de cocina para Fridays Perú",
+  "main": "index.js",
+  "scripts": {
+    "dev": "serverless offline start --stage local",
+    "deploy": "serverless deploy --stage dev --aws-profile fridays-dev --verbose",
+    "logs": "serverless logs -f getPendingOrders --stage dev --tail --aws-profile fridays-dev",
+    "remove": "serverless remove --stage dev --aws-profile fridays-dev"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1492.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.3.0"
+  }
+}

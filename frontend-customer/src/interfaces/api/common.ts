@@ -31,4 +31,4 @@ export interface FilterParams {
 
 
 
-export type Role = 'USUARIO' | 'COCINERO' | 'DESPACHADOR' | 'ADMIN';
+export type Role = 'Cliente' | 'USUARIO' | 'COCINERO' | 'DESPACHADOR' | 'ADMIN' | 'Cheff Ejecutivo' | 'Cocinero' | 'Empacador' | 'Repartidor' | 'Admin Sede';

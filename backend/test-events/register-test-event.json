@@ -1,0 +1,10 @@
+{
+  "resource": "/auth/register",
+  "path": "/auth/register",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"email\":\"cliente@test.com\",\"password\":\"Password123!\",\"firstName\":\"Juan\",\"lastName\":\"Pérez\",\"phoneNumber\":\"+51987654321\",\"address\":\"Av. Test 123\"}",
+  "isBase64Encoded": false
+}

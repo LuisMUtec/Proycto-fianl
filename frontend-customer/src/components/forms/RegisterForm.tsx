@@ -25,6 +25,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
     setLoading(true);
 
     try {
@@ -37,15 +39,33 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
         role: 'USER',
       });
 
-      if (result?.error) throw result.error;
+      if (result?.error) {
+        const errorMessage = result.error.message || 'Error en el registro';
 
-      // Redirigir al dashboard — DashboardPage selecciona vista por rol
+        // Mensajes personalizados según el error
+        if (errorMessage.includes('ya está registrado')) {
+          setError('Este email ya está registrado. ¿Quieres iniciar sesión?');
+        } else {
+          setError(errorMessage);
+        }
+        setLoading(false);
+        return;
+      }
+
+      setSuccess('¡Registro exitoso! Redirigiendo...');
+
+      // Redirigir al menú
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
+        navigate('/menu');
+      }, 1000);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Error en registro';
-      setError(msg);
+
+      if (msg.includes('ya está registrado')) {
+        setError('Este email ya está registrado. ¿Quieres iniciar sesión?');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
