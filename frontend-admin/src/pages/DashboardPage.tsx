@@ -64,7 +64,7 @@ export function DashboardPage() {
             <div>
               <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
               <p className="text-gray-300">
-                Bienvenido, <strong>{profile?.nombre || 'Usuario'}</strong> - {getRoleDisplay()}
+                Bienvenido, <strong>{profile?.firstName || profile?.nombre || 'Usuario'}</strong> - {getRoleDisplay()}
               </p>
             </div>
           </div>

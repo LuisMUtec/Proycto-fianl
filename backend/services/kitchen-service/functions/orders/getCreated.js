@@ -7,6 +7,7 @@ const { getUserFromEvent, validateAccess } = require('../../shared/auth/jwt-util
 const { query } = require('../../shared/database/dynamodb-client');
 const { USER_ROLES } = require('../../shared/constants/user-roles');
 const { success, forbidden, serverError } = require('../../shared/utils/response');
+const { ORDER_STATUS } = require('../../shared/constants/order-status');
 
 const ORDERS_TABLE = process.env.ORDERS_TABLE;
 
@@ -19,6 +20,7 @@ module.exports.handler = async (event) => {
       return forbidden('tenant_id requerido');
     }
     
+    // Listar órdenes en estado CREATED
     const orders = await query(
       ORDERS_TABLE,
       'tenant_id = :tenant_id AND #status = :status',

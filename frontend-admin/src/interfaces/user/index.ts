@@ -1,24 +1,40 @@
 /** Tipos de usuario adaptados a un restaurante */
-import type { Role } from '../api/common';
-export type { Role };
+/** Tipos de usuario adaptados a un restaurante */
+// Se normalizan campos para soportar tanto respuestas antiguas (es) como nuevas (en)
 
 export interface UserProfile {
-    id: string;
-    nombre: string;
+    // Canonical (camelCase / English)
+    userId?: string;
+    id?: string; // legacy id
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    address?: string;
+    role: string; // flexible string (backend provides multiple role labels)
+    tenantId?: string;
+    tenant_id?: string; // legacy snake_case
+    status?: 'ACTIVE' | 'INACTIVE' | string;
+    active?: boolean;
+    createdAt?: string; // ISO date
+    created_at?: string; // legacy
+    updatedAt?: string;
+    updated_at?: string;
+
+    // Spanish legacy fields (kept for compatibility with existing components)
+    nombre?: string;
     apellido?: string;
-    correo_electronico: string;
+    correo_electronico?: string;
     celular?: string;
-    role: Role;
-    sede_id?: string; // id de la sucursal/restaurant
+    sede_id?: string;
     activo?: boolean;
-    created_at?: string; // ISO date
 }
 
 export interface UserResponse {
     id: string;
-    correo_electronico: string;
-    role: Role;
-    nombre: string;
+    correo_electronico?: string;
+    role: string;
+    nombre?: string;
     apellido?: string;
 }
 

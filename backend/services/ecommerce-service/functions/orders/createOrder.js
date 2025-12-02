@@ -24,6 +24,8 @@ const dynamoConfig = process.env.STAGE === 'local'
 
 const dynamodb = new AWS.DynamoDB.DocumentClient(dynamoConfig);
 const stepfunctions = new AWS.StepFunctions();
+const sns = new AWS.SNS();
+const SNS_TOPIC_ARN = process.env.SNS_NOTIFICATIONS_TOPIC_ARN;
 
 const CARTS_TABLE = process.env.CARTS_TABLE || 'Carts-dev';
 const ORDERS_TABLE = process.env.ORDERS_TABLE || 'Orders-dev';
@@ -101,6 +103,40 @@ async function checkout(event) {
 
     const cart = cartResult.Item;
 
+    // Validar que todos los productos del carrito pertenezcan al mismo tenant_id
+    // Obtener los productos del carrito
+    const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || 'Products-dev';
+    const invalidProducts = [];
+    for (const item of cart.items) {
+      const product = await dynamodb.get({
+        TableName: PRODUCTS_TABLE,
+        Key: { productId: item.productId }
+      }).promise();
+      const prod = product.Item;
+      if (!prod || prod.tenant_id !== tenant_id) {
+        invalidProducts.push({
+          productId: item.productId,
+          name: item.name || (prod ? prod.name : null),
+          tenant_id: prod ? prod.tenant_id : null,
+          reason: !prod ? 'Producto no existe' : 'Producto no pertenece al tenant seleccionado'
+        });
+      }
+    }
+    if (invalidProducts.length > 0) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify({
+          success: false,
+          error: 'No todos los productos pertenecen al tenant seleccionado',
+          invalidProducts
+        })
+      };
+    }
+
     // Obtener información del usuario
     const userResult = await dynamodb.get({
       TableName: USERS_TABLE,
@@ -177,6 +213,20 @@ async function checkout(event) {
     }).promise();
 
     console.log(`✅ Orden ${orderId} guardada exitosamente`);
+
+    // Publicar en SNS
+    if (SNS_TOPIC_ARN) {
+      try {
+        await sns.publish({
+          TopicArn: SNS_TOPIC_ARN,
+          Subject: `Nueva orden creada: ${orderId}`,
+          Message: `Se ha creado una nueva orden:\n\n${JSON.stringify(order, null, 2)}`
+        }).promise();
+        console.log('📧 Notificación SNS enviada');
+      } catch (snsError) {
+        console.error('❌ Error al publicar en SNS:', snsError);
+      }
+    }
 
     // PASO 3: Vaciar carrito
     await dynamodb.delete({

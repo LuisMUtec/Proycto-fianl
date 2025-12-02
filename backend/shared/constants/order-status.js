@@ -7,6 +7,7 @@ module.exports = {
     CREATED: 'CREATED',         // Orden creada por cliente
     COOKING: 'COOKING',         // Asignada a cocinero, en preparación
     READY: 'READY',             // Lista para entregar
+    PACKED: 'PACKED',           // Orden empaquetada
     DELIVERING: 'DELIVERING',   // Repartidor en camino
     DELIVERED: 'DELIVERED',     // Entregada al cliente
     CANCELLED: 'CANCELLED'      // Cancelada

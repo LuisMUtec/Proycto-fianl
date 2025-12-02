@@ -1,7 +1,12 @@
 {
-  "Comment": "Order Workflow - Fridays Perú - Manual state changes via API",
-  "StartAt": "NotifyOrderCreated",
+  "Comment": "Order Workflow - Fridays Perú - Completo",
+  "StartAt": "SaveOrderInput",
   "States": {
+    "SaveOrderInput": {
+      "Type": "Pass",
+      "ResultPath": "$.orderInput",
+      "Next": "NotifyOrderCreated"
+    },
     "NotifyOrderCreated": {
       "Type": "Task",
       "Resource": "arn:aws:states:::events:putEvents",
@@ -22,13 +27,21 @@
           }
         ]
       },
-      "End": true,
+      "ResultPath": "$.notifyResult",
+      "Next": "SendOrderToSQS",
       "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "NotificationFailed"
-        }
+        { "ErrorEquals": ["States.ALL"], "Next": "NotificationFailed" }
       ]
+    },
+    "SendOrderToSQS": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/085179068256/fridays-order-queue-dev.fifo",
+        "MessageBody.$": "$.orderInput",
+        "MessageGroupId.$": "$.orderInput.tenant_id"
+      },
+      "End": true
     },
     "NotificationFailed": {
       "Type": "Pass",

@@ -1,0 +1,894 @@
+{
+	"info": {
+		"_postman_id": "4c453fe3-5476-4129-b60b-417123a6954f",
+		"name": "Fridays Perú - E-Commerce Service",
+		"description": "Colección completa para probar el servicio de E-Commerce\n\nIncluye:\n- AUTH (register, login, refresh, logout)\n- MENU (productos públicos)\n- ORDERS (crear, ver, cancelar)\n- CART (carrito)\n- PAYMENTS (pago simulado 1 click)\n- PRODUCTS ADMIN (CRUD productos)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43541521"
+	},
+	"item": [
+		{
+			"name": "🔐 AUTH",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('token', response.token);",
+									"    pm.collectionVariables.set('token', response.token);",
+									"    console.log('Token guardado:', response.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"email\":\"cliente005@test.com\",\n\"password\":\"Todos123\",\n\"firstName\":\"Ya funciona\",\n\"lastName\":\"siii\",\n\"phoneNumber\":\"+917201232\",\n\"address\":\"Av. Test 124\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registrar nuevo usuario (Cliente)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('token', response.token);",
+									"    pm.collectionVariables.set('token', response.token);",
+									"    console.log('✅ Login exitoso. Token guardado.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"email\":\"cliente005@test.com\",\n\"password\":\"Todos123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login y obtener JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Refrescar token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🍔 MENU (Público)",
+			"item": [
+				{
+					"name": "Listar Productos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Ver menú completo (público, no requiere auth)"
+					},
+					"response": []
+				},
+				{
+					"name": "Productos por Categoría",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/DRINK",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"DRINK"
+							]
+						},
+						"description": "Filtrar por categoría (hamburguesas, bebidas, postres, etc)"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Producto",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/PRODUCT%23002",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"items",
+								"PRODUCT%23002"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Productos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/search?q=Coca Cola 500ml",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "Coca Cola 500ml"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Categorías",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🛒 CART",
+			"item": [
+				{
+					"name": "Add to Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDU4NDAwLCJleHAiOjE3NjQ1NDQ4MDB9.Wj456bR36x63ANSTrTwQQPAn9idtXqjVFHmwR-pmWPE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PRODUCT#102\",\n  \"quantity\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDU4NDAwLCJleHAiOjE3NjQ1NDQ4MDB9.Wj456bR36x63ANSTrTwQQPAn9idtXqjVFHmwR-pmWPE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDQ4NDAwLCJleHAiOjE3NjQ1MzQ4MDB9.4BPOX-feF1WDEkGWgWK7ORXoGOYNeg_48f9-oIFpyng",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PRODUCT#002\",\n  \"quantity\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDU4NDAwLCJleHAiOjE3NjQ1NDQ4MDB9.Wj456bR36x63ANSTrTwQQPAn9idtXqjVFHmwR-pmWPE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart/item/PRODUCT%23101",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart",
+								"item",
+								"PRODUCT%23101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validar carrito",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDUwOTcxLCJleHAiOjE3NjQ1MzczNzF9.wkVtrFR-XwZeEI_Y4TAZjd-mLWc4MpIpRNbrj6aWt8g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tenant_id\": \"TENANT#001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/validate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📦 ORDERS",
+			"item": [
+				{
+					"name": "Create Order (Checkout)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('orderId', response.orderId);",
+									"    console.log('✅ Orden creada:', response.orderId);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDYxMjY1LCJleHAiOjE3NjQ1NDc2NjV9.xgLedmLBn31HYQeuGMxvNbPgSd56cUZnlKXnOCDZ3nE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"tenant_id\":\"TENANT#001\",\n\"deliveryAddress\":\n{\n    \"street\":\"Av. Principal 123\",\n    \"city\":\"Lima\",\"district\":\"Miraflores\",\n    \"zipCode\":\"15074\"\n},\n\"paymentMethod\":\"CARD\",\n\"notes\":\"Sin cebolla por favor\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Crear nueva orden desde el carrito"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDU2OTkzLCJleHAiOjE3NjQ1NDMzOTN9.PiXSXd8rI852ZP4GM1qg1A7Ww_YJJEc04iYu6Mf8NI8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwOTIxMmFmYi0xM2E4LTQyZWQtYWNhYS0xOTczNTA2OTAwM2EiLCJlbWFpbCI6ImNsaWVudGUwMDVAdGVzdC5jb20iLCJyb2xlIjoiQ2xpZW50ZSIsInRlbmFudF9pZCI6bnVsbCwiaWF0IjoxNzY0NDU2OTkzLCJleHAiOjE3NjQ1NDMzOTN9.PiXSXd8rI852ZP4GM1qg1A7Ww_YJJEc04iYu6Mf8NI8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"orders"
+							]
+						},
+						"description": "Ver mis órdenes (como cliente)"
+					},
+					"response": []
+				},
+				{
+					"name": "List All Orders (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxZDExZDA5Yy05Nzc2LTQ4OWItYjc3OS00ZjIwYTdmYzlhOTgiLCJlbWFpbCI6ImFkbWluQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDEiLCJpYXQiOjE3NjQ0NjA3NzQsImV4cCI6MTc2NDU0NzE3NH0.km1NIJWaupuDSlFOeEwUcI5kVYzBdcsiIChEnOrgwVc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderId}}",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💳 PAYMENTS (Simulado)",
+			"item": [
+				{
+					"name": "Pagar Orden (1 Click)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{orderId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								"confirm"
+							]
+						},
+						"description": "⚠️ SIMULACIÓN DE PAGO\n\nSolo requiere orderId, no tarjeta.\n95% éxito, 5% falla (testing)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment Intent (Opcional)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"amount\": 63.00,\n  \"currency\": \"PEN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/create-intent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								"create-intent"
+							]
+						},
+						"description": "Opcional en flujo simplificado"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "⚙️ PRODUCTS ADMIN",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n     \"name\": \"Pizza Pepperoni Grande\",\n     \"description\": \"Deliciosa pizza familiar con pepperoni y queso mozzarella\",\n     \"category\": \"FOOD\",\n     \"price\": 42.90,\n     \"currency\": \"PEN\",\n     \"preparationTimeMinutes\": 25,\n     \"isAvailable\": true,\n     \"tags\": [\"pizza\", \"pepperoni\", \"italiana\"],\n     \"nutritionalInfo\": {\n       \"calories\": 850,\n       \"protein\": 38,\n       \"carbs\": 95,\n       \"fat\": 42\n     }\n   }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl2}}/productos",
+							"host": [
+								"{{baseUrl2}}"
+							],
+							"path": [
+								"productos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Products (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MzQ0MzgsImV4cCI6MTc2NDUyMDgzOH0.khhV_rni-qwqCMHkyt7pBuBYMOuzXgmTvv50MAJ3chI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl2}}/products",
+							"host": [
+								"{{baseUrl2}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n     \"price\": 39.90,\n     \"description\": \"¡OFERTA! Deliciosa pizza familiar con pepperoni premium y queso mozzarella 100% natural\"\n   }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl2}}/products/PRODUCT%23647725BB",
+							"host": [
+								"{{baseUrl2}}"
+							],
+							"path": [
+								"products",
+								"PRODUCT%23647725BB"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Availability",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"available\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123/availability",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"items",
+								"prod_123",
+								"availability"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/menu/items/prod_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"menu",
+								"items",
+								"prod_123"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://YOUR-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

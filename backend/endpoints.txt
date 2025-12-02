@@ -21,15 +21,18 @@ endpoints:
   GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/users/orders
   GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders
   PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}/cancel
-  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/sync
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/validate
+  POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart
+  GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart
   DELETE - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart
+  PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart
+  DELETE - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/item/{productId}
   POST - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/productos
   PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/items/{itemId}
   PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/items/{itemId}/availability
   DELETE - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/items/{itemId}
   GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/productos
   GET - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/productos/{productId}
-  PUT - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}
   DELETE - https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}
 functions:
   authorizer: fridays-ecommerce-service-dev-authorizer
@@ -47,15 +50,18 @@ functions:
   listUserOrders: fridays-ecommerce-service-dev-listUserOrders
   listOrders: fridays-ecommerce-service-dev-listOrders
   cancelOrder: fridays-ecommerce-service-dev-cancelOrder
-  syncCart: fridays-ecommerce-service-dev-syncCart
+  validateCart: fridays-ecommerce-service-dev-validateCart
+  addToCart: fridays-ecommerce-service-dev-addToCart
+  getCart: fridays-ecommerce-service-dev-getCart
   clearCart: fridays-ecommerce-service-dev-clearCart
+  updateCart: fridays-ecommerce-service-dev-updateCart
+  removeFromCart: fridays-ecommerce-service-dev-removeFromCart
   adminCreateProduct: fridays-ecommerce-service-dev-adminCreateProduct
   adminUpdateItem: fridays-ecommerce-service-dev-adminUpdateItem
   adminUpdateAvailability: fridays-ecommerce-service-dev-adminUpdateAvailability
   adminDeleteItem: fridays-ecommerce-service-dev-adminDeleteItem
   adminListProducts: fridays-ecommerce-service-dev-adminListProducts
   adminGetProduct: fridays-ecommerce-service-dev-adminGetProduct
-  updateOrder: fridays-ecommerce-service-dev-updateOrder
   deleteOrder: fridays-ecommerce-service-dev-deleteOrder
 
 
@@ -67,36 +73,24 @@ stage: dev
 region: us-east-1
 stack: fridays-kitchen-service-dev
 endpoints:
-  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/created
-  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/assign
-  PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}
-  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/ready
-  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs
-  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs
-  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders
-  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders
-  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}
-  PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/status
   GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs
   PUT - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
   DELETE - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}
-  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/seed
+  POST - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/assign
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/created
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}
+  GET - https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders
 functions:
-  authorizer: fridays-kitchen-service-dev-authorizer
-  getCreatedOrders: fridays-kitchen-service-dev-getCreatedOrders
-  assignOrder: fridays-kitchen-service-dev-assignOrder
-  updateOrder: fridays-kitchen-service-dev-updateOrder
-  markOrderReady: fridays-kitchen-service-dev-markOrderReady
-  listChefs: fridays-kitchen-service-dev-listChefs
-  createChef: fridays-kitchen-service-dev-createChef
-  createOrderInKitchen: fridays-kitchen-service-dev-createOrderInKitchen
-  listKitchenOrders: fridays-kitchen-service-dev-listKitchenOrders
-  getKitchenOrder: fridays-kitchen-service-dev-getKitchenOrder
-  putOrderStatus: fridays-kitchen-service-dev-putOrderStatus
   getChef: fridays-kitchen-service-dev-getChef
+  listChefs: fridays-kitchen-service-dev-listChefs
   updateChef: fridays-kitchen-service-dev-updateChef
   deleteChef: fridays-kitchen-service-dev-deleteChef
-  seedChefs: fridays-kitchen-service-dev-seedChefs
+  assignOrder: fridays-kitchen-service-dev-assignOrder
+  getCreatedOrders: fridays-kitchen-service-dev-getCreatedOrders
+  getKitchenOrder: fridays-kitchen-service-dev-getKitchenOrder
+  listKitchenOrders: fridays-kitchen-service-dev-listKitchenOrders
+  authorizer: fridays-kitchen-service-dev-authorizer
 
 
 ════════════════════════════════════════════════════════
@@ -107,36 +101,28 @@ stage: dev
 region: us-east-1
 stack: fridays-delivery-service-dev
 endpoints:
-  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/available
-  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers
-  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers
-  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/assign
-  PUT - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/status
-  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/tracking
-  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders
-  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
-  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders
-  DELETE - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
   GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/available
+  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/assign
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
+  DELETE - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}
+  GET - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/tracking
   PUT - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
   DELETE - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}
-  POST - https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/seed
 functions:
-  authorizer: fridays-delivery-service-dev-authorizer
-  getAvailableDrivers: fridays-delivery-service-dev-getAvailableDrivers
-  listDrivers: fridays-delivery-service-dev-listDrivers
-  createDriver: fridays-delivery-service-dev-createDriver
-  assignDriver: fridays-delivery-service-dev-assignDriver
-  updateOrderStatus: fridays-delivery-service-dev-updateOrderStatus
-  getOrderTracking: fridays-delivery-service-dev-getOrderTracking
-  createDeliveryRecord: fridays-delivery-service-dev-createDeliveryRecord
-  getDeliveryOrder: fridays-delivery-service-dev-getDeliveryOrder
-  listDeliveryOrders: fridays-delivery-service-dev-listDeliveryOrders
-  deleteDeliveryOrder: fridays-delivery-service-dev-deleteDeliveryOrder
   getDriver: fridays-delivery-service-dev-getDriver
+  listDrivers: fridays-delivery-service-dev-listDrivers
+  getAvailableDrivers: fridays-delivery-service-dev-getAvailableDrivers
+  assignDelivery: fridays-delivery-service-dev-assignDelivery
+  listOrders: fridays-delivery-service-dev-listOrders
+  getOrder: fridays-delivery-service-dev-getOrder
+  deleteOrder: fridays-delivery-service-dev-deleteOrder
+  getTracking: fridays-delivery-service-dev-getTracking
+  authorizer: fridays-delivery-service-dev-authorizer
   updateDriver: fridays-delivery-service-dev-updateDriver
   deleteDriver: fridays-delivery-service-dev-deleteDriver
-  seedDrivers: fridays-delivery-service-dev-seedDrivers
 
 
 ════════════════════════════════════════════════════════
@@ -164,9 +150,6 @@ endpoints:
   GET - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/products/{productId}
   PUT - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/products/{productId}
   DELETE - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/products/{productId}
-  GET - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/kitchen/metrics
-  GET - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/finances/daily
-  GET - https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/finances/monthly
 functions:
   authorizer: fridays-admin-service-dev-authorizer
   getDashboard: fridays-admin-service-dev-getDashboard
@@ -186,9 +169,6 @@ functions:
   getAdminProduct: fridays-admin-service-dev-getAdminProduct
   updateAdminProduct: fridays-admin-service-dev-updateAdminProduct
   deleteAdminProduct: fridays-admin-service-dev-deleteAdminProduct
-  kitchenMetrics: fridays-admin-service-dev-kitchenMetrics
-  financesDaily: fridays-admin-service-dev-financesDaily
-  financesMonthly: fridays-admin-service-dev-financesMonthly
 
 
 ════════════════════════════════════════════════════════
@@ -199,11 +179,11 @@ stage: dev
 region: us-east-1
 stack: fridays-websocket-service-dev
 endpoints:
-  POST - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/notify
-  GET - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections
-  GET - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
-  DELETE - https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
-  wss://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev
+  POST - https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/notify
+  GET - https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections
+  GET - https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
+  DELETE - https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}
+  wss://m4mwqz1lm5.execute-api.us-east-1.amazonaws.com/dev
 functions:
   authorizer: fridays-websocket-service-dev-authorizer
   onConnect: fridays-websocket-service-dev-onConnect

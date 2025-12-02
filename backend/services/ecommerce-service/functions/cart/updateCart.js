@@ -37,21 +37,30 @@ async function updateCart(event) {
       items.splice(itemIndex, 1);
     } else {
       items[itemIndex].quantity = quantity;
+      // Recalcular subtotal usando el precio guardado en el carrito
+      items[itemIndex].subtotal = (items[itemIndex].price || 0) * quantity;
     }
+
+    // Recalcular totales
+    const total = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+    const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const updatedCart = {
+      userId: user.userId,
+      items,
+      total,
+      itemCount,
+      updatedAt: new Date().toISOString()
+    };
 
     await dynamodb.put({
       TableName: CARTS_TABLE,
-      Item: {
-        userId: user.userId,
-        items,
-        updatedAt: new Date().toISOString()
-      }
+      Item: updatedCart
     }).promise();
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ success: true, data: { items } })
+      body: JSON.stringify({ success: true, data: updatedCart })
     };
   } catch (error) {
     console.error('Error:', error);

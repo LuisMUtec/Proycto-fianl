@@ -27,6 +27,7 @@ provider:
     S3_BUCKET_NAME: fridays-product-images-${self:provider.stage}
     ORDER_PROCESSING_STATE_MACHINE_ARN: arn:aws:states:us-east-1:085179068256:stateMachine:FridaysOrderWorkflow-${self:provider.stage}
     SQS_ORDER_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/085179068256/fridays-order-queue-${self:provider.stage}.fifo
+
     SNS_NOTIFICATIONS_TOPIC_ARN: arn:aws:sns:us-east-1:085179068256:fridays-notifications-${self:provider.stage}
 
 # Configurar empaquetado para incluir shared
@@ -36,6 +37,7 @@ package:
     - 'shared/**'
     - '!shared/**/*.test.js'
     - '!**/*.md'
+
 
 functions:
   # ============================================================================
@@ -47,6 +49,7 @@ functions:
   # ============================================================================
   # AUTH SERVICE
   # ============================================================================
+
   register:
     handler: functions/auth/register.handler
     events:
@@ -193,22 +196,61 @@ functions:
   # ============================================================================
   # CART (CLIENTE)
   # ============================================================================
-  syncCart:
-    handler: functions/cart/syncCart.handler
+  validateCart:
+    handler: functions/cart/validate.handler
     events:
       - http:
-          path: /cart/sync
+          path: /cart/validate
           method: POST
           cors: true
           authorizer:
             name: authorizer
             type: REQUEST
-
+  addToCart:
+    handler: functions/cart/addToCart.handler
+    events:
+      - http:
+          path: /cart
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+  getCart:
+    handler: functions/cart/getCart.handler
+    events:
+      - http:
+          path: /cart
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
   clearCart:
     handler: functions/cart/clearCart.handler
     events:
       - http:
           path: /cart
+          method: DELETE
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+  updateCart:
+    handler: functions/cart/updateCart.handler
+    events:
+      - http:
+          path: /cart
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+  removeFromCart:
+    handler: functions/cart/removeFromCart.handler
+    events:
+      - http:
+          path: /cart/item/{productId}
           method: DELETE
           cors: true
           authorizer:
@@ -287,16 +329,6 @@ functions:
             name: authorizer
             type: REQUEST
 
-  updateOrder:
-    handler: functions/orders/updateOrder.handler
-    events:
-      - http:
-          path: /orders/{orderId}
-          method: PUT
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
 
   deleteOrder:
     handler: functions/orders/deleteOrder.handler
@@ -308,6 +340,10 @@ functions:
           authorizer:
             name: authorizer
             type: REQUEST
+
+
+resources:
+  - ${file(resources/orders-table.yml)}
 
 plugins:
   - serverless-offline

@@ -25,6 +25,8 @@ package:
   patterns:
     - 'functions/**'
     - 'shared/**'
+    - 'node_modules/**'
+    - 'package.json'
     - '!shared/**/*.test.js'
     - '!**/*.md'
 
@@ -48,15 +50,11 @@ functions:
     handler: functions/events/handleOrderStatusChange.handler
     events:
       - eventBridge:
-          eventBus: fridays-event-bus-${self:provider.stage}
-          pattern:
-            source:
-              - fridays.orders
-              - fridays.kitchen
-              - fridays.delivery
-            detail-type:
-              - OrderCreated
-              - OrderStatusChanged
+            eventBus: fridays-event-bus-${self:provider.stage}
+            pattern:
+              detail-type:
+                - OrderCreated
+                - OrderStatusChanged
 
   # ============================================================================
   # FUNCIONES ADICIONALES - WEBSOCKET

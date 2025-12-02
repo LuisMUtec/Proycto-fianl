@@ -26,7 +26,7 @@ module.exports.handler = async (event) => {
       ORDERS_TABLE,
       'tenant_id = :tenant_id',
       { ':tenant_id': tenantId },
-      'tenant_id-status-index'
+      'tenant-index'
     );
     
     const stats = {

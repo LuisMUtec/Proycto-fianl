@@ -11,7 +11,7 @@ export function Navbar({ currentPage }: NavbarProps) {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const profileName = (profile as any)?.nombre || (profile as any)?.name || (profile as any)?.correo_electronico || '';
+  const profileName = (profile as any)?.firstName || (profile as any)?.nombre || (profile as any)?.name || (profile as any)?.correo_electronico || '';
   const profileRole = String(((profile as any)?.role ?? '').toString().toUpperCase());
   const showMainMenu = !profile || profileRole === 'USER';
 
@@ -79,7 +79,7 @@ export function Navbar({ currentPage }: NavbarProps) {
             {profile ? (
               <ul className="flex space-x-10 uppercase font-semibold text-sm">
                 <li>
-                  <button onClick={() => navigate('/')} className={`px-2 py-1 ${currentPage === '' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
+                  <button onClick={() => navigate('/dashboard')} className={`px-2 py-1 ${currentPage === '' ? 'text-red-600' : 'text-black hover:text-red-600'}`}>
                     DASHBOARD
                   </button>
                 </li>

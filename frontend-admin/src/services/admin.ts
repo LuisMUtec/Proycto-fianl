@@ -21,7 +21,8 @@ function getAuthHeaders(): HeadersInit | undefined {
   return token ? { Authorization: `Bearer ${token}` } : undefined;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || ''; // Asegúrate de tener VITE_API_URL
+// Prefer explicit base vars; fall back to older names if needed
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL_COMIDA || import.meta.env.VITE_API_URL || '';
 
 async function handleResponse(res: Response) {
   if (!res.ok) {
@@ -46,13 +47,50 @@ export async function getProduct(id: string) {
   return handleResponse(res);
 }
 
-export async function createProduct(payload: any) {
+export type CreateProductPayload = {
+  name: string;
+  description?: string;
+  category?: string;
+  price: number;
+  currency?: string;
+  preparationTimeMinutes?: number;
+  isAvailable?: boolean;
+  tags?: string[];
+  nutritionalInfo?: {
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
+};
+
+export type CreatedProductResult = {
+  product: any;
+  s3UploadUrl?: string;
+  message?: string;
+};
+
+export async function createProduct(payload: CreateProductPayload): Promise<CreatedProductResult> {
   const res = await fetch(`${API_BASE}/admin/products`, {
     method: 'POST',
     headers: { ...(getAuthHeaders() ?? {}), 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  return handleResponse(res);
+
+  const json = await handleResponse(res);
+
+  // Response shape expected:
+  // { success: true, message: 'Success', data: { product: {...}, message: '...', s3UploadUrl: '...' } }
+  if (json && typeof json === 'object') {
+    const data = json.data ?? json;
+    return {
+      product: data.product ?? data.product,
+      s3UploadUrl: data.s3UploadUrl ?? data.s3_upload_url ?? undefined,
+      message: data.message ?? json.message ?? undefined,
+    } as CreatedProductResult;
+  }
+
+  return { product: json } as CreatedProductResult;
 }
 
 export async function updateProduct(id: string, payload: any) {

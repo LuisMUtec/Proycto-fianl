@@ -28,15 +28,11 @@ package:
     - '!**/*.md'
 
 functions:
-  authorizer:
-    handler: shared/auth/authorizer.handler
-
-  # Drivers
-  getAvailableDrivers:
-    handler: functions/drivers/getAvailable.handler
+  getDriver:
+    handler: functions/drivers/getDriver.handler
     events:
       - http:
-          path: /delivery/drivers/available
+          path: /delivery/drivers/{driverId}
           method: GET
           cors: true
           authorizer:
@@ -54,20 +50,19 @@ functions:
             name: authorizer
             type: REQUEST
 
-  createDriver:
-    handler: functions/drivers/createDriver.handler
+  getAvailableDrivers:
+    handler: functions/drivers/getAvailable.handler
     events:
       - http:
-          path: /delivery/drivers
-          method: POST
+          path: /delivery/drivers/available
+          method: GET
           cors: true
           authorizer:
             name: authorizer
             type: REQUEST
 
-  # Orders
-  assignDriver:
-    handler: functions/orders/assignDriver.handler
+  assignDelivery:
+    handler: functions/orders/assignDelivery.handler
     events:
       - http:
           path: /delivery/orders/{orderId}/assign
@@ -77,54 +72,7 @@ functions:
             name: authorizer
             type: REQUEST
 
-  updateOrderStatus:
-    handler: functions/orders/updateStatus.handler
-    events:
-      - http:
-          path: /delivery/orders/{orderId}/status
-          method: PUT
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  getOrderTracking:
-    handler: functions/orders/getTracking.handler
-    events:
-      - http:
-          path: /delivery/orders/{orderId}/tracking
-          method: GET
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  # ============================================================================
-  # NUEVAS FUNCIONES AGREGADAS - DELIVERY
-  # ============================================================================
-  createDeliveryRecord:
-    handler: functions/orders/createDeliveryRecord.handler
-    events:
-      - http:
-          path: /delivery/orders
-          method: POST
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  getDeliveryOrder:
-    handler: functions/orders/getOrder.handler
-    events:
-      - http:
-          path: /delivery/orders/{orderId}
-          method: GET
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  listDeliveryOrders:
+  listOrders:
     handler: functions/orders/listOrders.handler
     events:
       - http:
@@ -135,7 +83,18 @@ functions:
             name: authorizer
             type: REQUEST
 
-  deleteDeliveryOrder:
+  getOrder:
+    handler: functions/orders/getOrder.handler
+    events:
+      - http:
+          path: /delivery/orders/{orderId}
+          method: GET
+          cors: true
+          authorizer:
+            name: authorizer
+            type: REQUEST
+
+  deleteOrder:
     handler: functions/orders/deleteOrder.handler
     events:
       - http:
@@ -146,17 +105,18 @@ functions:
             name: authorizer
             type: REQUEST
 
-  getDriver:
-    handler: functions/drivers/getDriver.handler
+  getTracking:
+    handler: functions/orders/getTracking.handler
     events:
       - http:
-          path: /delivery/drivers/{driverId}
+          path: /delivery/orders/{orderId}/tracking
           method: GET
           cors: true
           authorizer:
             name: authorizer
             type: REQUEST
-
+  authorizer:
+    handler: shared/auth/authorizer.handler
   updateDriver:
     handler: functions/drivers/updateDriver.handler
     events:
@@ -174,17 +134,6 @@ functions:
       - http:
           path: /delivery/drivers/{driverId}
           method: DELETE
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  seedDrivers:
-    handler: functions/drivers/seedDrivers.handler
-    events:
-      - http:
-          path: /delivery/drivers/seed
-          method: POST
           cors: true
           authorizer:
             name: authorizer

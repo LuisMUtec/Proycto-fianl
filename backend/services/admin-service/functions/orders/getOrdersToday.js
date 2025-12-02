@@ -22,17 +22,18 @@ module.exports.handler = async (event) => {
     
     const orders = await query(
       ORDERS_TABLE,
-      'tenant_id = :tenant_id AND begins_with(createdAt, :today)',
+      'tenant_id = :tenant_id',
       {
-        ':tenant_id': tenant_id,
-        ':today': today
+        ':tenant_id': tenant_id
       },
-      'tenant_id-createdAt-index'
+      'tenant-index'
     );
+    // Filtrar por fecha en backend
+    const filteredOrders = orders.filter(o => o.createdAt && o.createdAt.startsWith(today));
 
     return success({
-      orders,
-      count: orders.length,
+      orders: filteredOrders,
+      count: filteredOrders.length,
       date: today
     });
 

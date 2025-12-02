@@ -103,9 +103,7 @@ functions:
             name: authorizer
             type: REQUEST
 
-  # ============================================================================
-  # NUEVAS FUNCIONES AGREGADAS - ADMIN
-  # ============================================================================
+
   getSede:
     handler: functions/sedes/getSede.handler
     events:
@@ -222,39 +220,6 @@ functions:
       - http:
           path: /admin/products/{productId}
           method: DELETE
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  kitchenMetrics:
-    handler: functions/metrics/kitchenMetrics.handler
-    events:
-      - http:
-          path: /admin/kitchen/metrics
-          method: GET
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  financesDaily:
-    handler: functions/finances/financesDaily.handler
-    events:
-      - http:
-          path: /admin/finances/daily
-          method: GET
-          cors: true
-          authorizer:
-            name: authorizer
-            type: REQUEST
-
-  financesMonthly:
-    handler: functions/finances/financesMonthly.handler
-    events:
-      - http:
-          path: /admin/finances/monthly
-          method: GET
           cors: true
           authorizer:
             name: authorizer

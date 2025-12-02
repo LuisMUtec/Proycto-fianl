@@ -10,7 +10,8 @@
     "remove": "serverless remove --stage dev --aws-profile fridays-dev"
   },
   "dependencies": {
-    "aws-sdk": "^2.1492.0"
+    "aws-sdk": "^2.1492.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "serverless-offline": "^13.0.0"

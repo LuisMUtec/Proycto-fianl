@@ -17,7 +17,7 @@ export function LoginPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <LoginForm onSwitchToRegister={() => navigate('/auth/register')} />
+          <LoginForm />
 
           <div className="mt-6 text-center">
             <button

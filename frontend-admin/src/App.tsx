@@ -18,7 +18,7 @@ export default function App() {
   };
 
   // Rutas que no deben mostrar el Navbar
-  const hideNavbarRoutes = ['/auth', '/auth/login', '/auth/register'];
+  const hideNavbarRoutes = ['/auth', '/auth/login'];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
   return (

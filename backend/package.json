@@ -1,50 +1,28 @@
 {
-  "name": "fridays-backend-root",
+  "name": "fridays-backend",
   "version": "1.0.0",
-  "description": "Fridays Perú - Sistema de Gestión de Pedidos",
+  "description": "Backend serverless para sistema de gestión de órdenes Fridays",
+  "main": "serverless.yml",
   "scripts": {
-    "setup": "npm run install:all && npm run setup:dynamodb",
-    "install:all": "cd services/ecommerce-service && npm install && cd ../kitchen-service && npm install && cd ../delivery-service && npm install && cd ../admin-service && npm install && cd ../websocket-service && npm install",
-    "local:dynamodb": "docker run -d -p 8000:8000 --name dynamodb-local amazon/dynamodb-local",
-    "local:dynamodb:stop": "docker stop dynamodb-local && docker rm dynamodb-local",
-    "setup:tables": "node scripts/create-tables-local.js",
-    "seed:data": "node scripts/seed-data-local.js",
-    "setup:dynamodb": "npm run setup:tables && npm run seed:data",
-    "dev:ecommerce": "cd services/ecommerce-service && serverless offline start --stage local",
-    "dev:kitchen": "cd services/kitchen-service && serverless offline start --stage local",
-    "dev:delivery": "cd services/delivery-service && serverless offline start --stage local",
-    "dev:admin": "cd services/admin-service && serverless offline start --stage local",
-    "dev:websocket": "cd services/websocket-service && serverless offline start --stage local",
-    "deploy:ecommerce": "cd services/ecommerce-service && serverless deploy --stage dev --aws-profile fridays-dev --verbose",
-    "deploy:kitchen": "cd services/kitchen-service && serverless deploy --stage dev --aws-profile fridays-dev --verbose",
-    "deploy:delivery": "cd services/delivery-service && serverless deploy --stage dev --aws-profile fridays-dev --verbose",
-    "deploy:admin": "cd services/admin-service && serverless deploy --stage dev --aws-profile fridays-dev --verbose",
-    "deploy:websocket": "cd services/websocket-service && serverless deploy --stage dev --aws-profile fridays-dev --verbose",
-    "deploy:all": "npm run deploy:ecommerce && npm run deploy:kitchen && npm run deploy:delivery && npm run deploy:admin && npm run deploy:websocket",
-    "remove:ecommerce": "cd services/ecommerce-service && serverless remove --stage dev --aws-profile fridays-dev",
-    "remove:kitchen": "cd services/kitchen-service && serverless remove --stage dev --aws-profile fridays-dev",
-    "remove:delivery": "cd services/delivery-service && serverless remove --stage dev --aws-profile fridays-dev",
-    "remove:admin": "cd services/admin-service && serverless remove --stage dev --aws-profile fridays-dev",
-    "logs:delivery": "cd services/delivery-service && serverless logs -f assignDriver --stage dev --tail --aws-profile fridays-dev",
-    "logs:admin": "cd services/admin-service && serverless logs -f getDashboard --stage dev --tail --aws-profile fridays-dev",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  },
-  "devDependencies": {
-    "aws-sdk": "^2.1492.0",
-    "bcryptjs": "^3.0.3",
-    "jest": "^29.7.0",
-    "serverless": "^3.40.0",
-    "uuid": "^9.0.1"
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f",
+    "invoke": "serverless invoke -f"
   },
   "keywords": [
     "serverless",
     "aws",
     "lambda",
-    "dynamodb",
-    "api-gateway"
+    "websocket",
+    "step-functions"
   ],
-  "author": "Equipo Fridays Perú",
-  "license": "MIT"
+  "author": "Fridays Peru",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^4.4.0",
+    "serverless-python-requirements": "^6.1.2",
+    "serverless-step-functions": "^3.21.0"
+  }
 }

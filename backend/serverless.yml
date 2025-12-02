@@ -1,0 +1,430 @@
+org: leonardogst  # 👈 REEMPLAZA CON TU ORGANIZACIÓN
+service: fridays-backend
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.12
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 1024
+  timeout: 30
+  
+  # ⚠️ REEMPLAZA 123456789012 CON TU AWS ACCOUNT ID
+  # Para obtenerlo: aws sts get-caller-identity --query Account --output text
+  iam:
+    role: arn:aws:iam::085989816475:role/LabRole  # 👈 REEMPLAZA CON TU ACCOUNT ID
+  
+  layers:
+    - Ref: PythonRequirementsLambdaLayer
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    ORDERS_TABLE: ${self:service}-orders-${self:provider.stage}
+    PRODUCTS_TABLE: ${self:service}-products-${self:provider.stage}
+    USERS_TABLE: ${self:service}-users-${self:provider.stage}
+    SEDES_TABLE: ${self:service}-sedes-${self:provider.stage}
+    WS_CONNECTIONS_TABLE: ${self:service}-ws-connections-${self:provider.stage}
+    JWT_SECRET_PARAM: /fridays/jwt-secret
+    EVENT_BUS_NAME: default
+    S3_BUCKET: ${self:service}-images-${self:provider.stage}
+
+plugins:
+  - serverless-step-functions
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+    slim: true
+    strip: false
+    pythonBin: python3
+    layer: true
+
+functions:
+  # ==========================================
+  # AUTHORIZER - JWT Validation
+  # ==========================================
+  
+  authorizer:
+    handler: shared/auth/authorizer.handler
+    environment:
+      JWT_SECRET_PARAM: ${self:provider.environment.JWT_SECRET_PARAM}
+    description: "Valida tokens JWT para proteger endpoints"
+
+  # ==========================================
+  # AUTH - Register & Login
+  # ==========================================
+  
+  authRegister:
+    handler: functions/auth/handler.handler
+    environment:
+      USERS_TABLE: ${self:provider.environment.USERS_TABLE}
+      JWT_SECRET_PARAM: ${self:provider.environment.JWT_SECRET_PARAM}
+    description: "Registro y login de usuarios"
+    events:
+      - http:
+          path: /auth/register
+          method: POST
+          cors: true
+      - http:
+          path: /auth/login
+          method: POST
+          cors: true
+
+  # ==========================================
+  # PRODUCTO SERVICE - CRUD Productos
+  # ==========================================
+  
+  productoService:
+    handler: functions/producto-service/handler.handler
+    environment:
+      PRODUCTS_TABLE: ${self:provider.environment.PRODUCTS_TABLE}
+      S3_BUCKET: ${self:provider.environment.S3_BUCKET}
+    description: "CRUD de productos con integración S3"
+    events:
+      # Público - Listar menú
+      - http:
+          path: /menu
+          method: GET
+          cors: true
+      - http:
+          path: /menu/{category}
+          method: GET
+          cors: true
+      # Protegido - Solo ADMIN
+      - http:
+          path: /menu/productos
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+      - http:
+          path: /menu/items/{itemId}
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+      - http:
+          path: /menu/items/{itemId}/availability
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+
+  # ==========================================
+  # ORDER WORKFLOW - Step Functions Lambdas
+  # ==========================================
+  
+  prepareOrderData:
+    handler: functions/order-workflow/prepare_order_data.handler
+    environment:
+      PRODUCTS_TABLE: ${self:provider.environment.PRODUCTS_TABLE}
+      USERS_TABLE: ${self:provider.environment.USERS_TABLE}
+    description: "Valida y prepara los datos de la orden antes de persistir"
+
+  persistAndBuildOrder:
+    handler: functions/order-workflow/persist_and_build_order.handler
+    environment:
+      ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
+    description: "Persiste la orden en DynamoDB"
+
+  publishOrderCreatedEvent:
+    handler: functions/order-workflow/publish_order_created_event.handler
+    environment:
+      EVENT_BUS_NAME: ${self:provider.environment.EVENT_BUS_NAME}
+    description: "Publica evento ORDER_CREATED en EventBridge"
+
+  # ==========================================
+  # UPDATE STATUS - HTTP Endpoint
+  # ==========================================
+  
+  updateStatus:
+    handler: functions/update-status/handler.handler
+    environment:
+      ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
+      EVENT_BUS_NAME: ${self:provider.environment.EVENT_BUS_NAME}
+    description: "Actualiza el estado de una orden y publica evento ORDER_STATUS_CHANGED"
+    events:
+      - http:
+          path: /orders/{tenantId}/{orderId}/status
+          method: PUT
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+
+  # ==========================================
+  # WEBSOCKET - Handlers
+  # ==========================================
+  
+  onConnect:
+    handler: functions/websocket/on_connect.handler
+    environment:
+      WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
+    description: "Registra conexión WebSocket en DynamoDB"
+    events:
+      - websocket:
+          route: $connect
+
+  onDisconnect:
+    handler: functions/websocket/on_disconnect.handler
+    environment:
+      WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
+    description: "Elimina conexión WebSocket de DynamoDB"
+    events:
+      - websocket:
+          route: $disconnect
+
+  # ==========================================
+  # BROADCAST - EventBridge Target
+  # ==========================================
+  
+  orderEventsToWS:
+    handler: functions/websocket/order_events_to_ws.handler
+    environment:
+      WS_CONNECTIONS_TABLE: ${self:provider.environment.WS_CONNECTIONS_TABLE}
+      WEBSOCKET_ENDPOINT: 
+        Fn::Sub: "https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}"
+    description: "Envía eventos de órdenes a clientes conectados vía WebSocket"
+    events:
+      - eventBridge:
+          eventBus: default
+          pattern:
+            detail-type:
+              - ORDER_CREATED
+              - ORDER_STATUS_CHANGED
+
+  # ==========================================
+  # ORDER WORKFLOW TRIGGER - Lambda que invoca Step Function
+  # ==========================================
+  
+  createOrder:
+    handler: functions/order-workflow/create_order.handler
+    environment:
+      ORDERS_TABLE: ${self:provider.environment.ORDERS_TABLE}
+      STATE_MACHINE_ARN: 
+        Fn::GetAtt: [OrderWorkflowDashdev, Arn]
+    description: "Lambda que inicia el Step Function de órdenes"
+    events:
+      - http:
+          path: /orders
+          method: POST
+          cors: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 300
+
+# ==========================================
+# STEP FUNCTIONS - Order Workflow
+# ==========================================
+
+stepFunctions:
+  stateMachines:
+    orderWorkflow:
+      name: orderWorkflow-${self:provider.stage}
+      role: arn:aws:iam::085989816475:role/LabRole
+      definition:
+        Comment: "Order creation workflow"
+        StartAt: PrepareOrderData
+        States:
+          PrepareOrderData:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [prepareOrderData, Arn]
+            Next: PersistAndBuildOrder
+            Retry:
+              - ErrorEquals:
+                  - States.ALL
+                IntervalSeconds: 2
+                MaxAttempts: 2
+                BackoffRate: 1.5
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                ResultPath: $.error
+                Next: WorkflowFailed
+          
+          PersistAndBuildOrder:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [persistAndBuildOrder, Arn]
+            Next: PublishOrderCreatedEvent
+            Retry:
+              - ErrorEquals:
+                  - States.ALL
+                IntervalSeconds: 2
+                MaxAttempts: 2
+                BackoffRate: 1.5
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                ResultPath: $.error
+                Next: WorkflowFailed
+          
+          PublishOrderCreatedEvent:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [publishOrderCreatedEvent, Arn]
+            Next: WorkflowSucceeded
+            Retry:
+              - ErrorEquals:
+                  - States.ALL
+                IntervalSeconds: 2
+                MaxAttempts: 2
+                BackoffRate: 1.5
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                ResultPath: $.error
+                Next: WorkflowFailed
+          
+          WorkflowSucceeded:
+            Type: Succeed
+          
+          WorkflowFailed:
+            Type: Fail
+            Cause: "Order workflow failed"
+
+# ==========================================
+# DYNAMODB TABLES
+# ==========================================
+
+resources:
+  Resources:
+    # Tabla de Órdenes
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.ORDERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: orderId
+            AttributeType: S
+          - AttributeName: tenantId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: orderId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: tenantId-status-index
+            KeySchema:
+              - AttributeName: tenantId
+                KeyType: HASH
+              - AttributeName: status
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: tenantId-createdAt-index
+            KeySchema:
+              - AttributeName: tenantId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Productos
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.PRODUCTS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+          - AttributeName: tenantId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: tenantId-index
+            KeySchema:
+              - AttributeName: tenantId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Usuarios
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: tenantId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: tenantId-index
+            KeySchema:
+              - AttributeName: tenantId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Sedes
+    SedesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.SEDES_TABLE}
+        AttributeDefinitions:
+          - AttributeName: tenantId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tenantId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabla de Conexiones WebSocket
+    WSConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.WS_CONNECTIONS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: tenantId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: tenantId-index
+            KeySchema:
+              - AttributeName: tenantId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST

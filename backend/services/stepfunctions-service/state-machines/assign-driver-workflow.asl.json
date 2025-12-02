@@ -1,0 +1,33 @@
+{
+  "Comment": "Asignación automática de driver para orden READY",
+  "StartAt": "AssignDriver",
+  "States": {
+    "AssignDriver": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:085179068256:function:AssignDriver",
+      "ResultPath": "$.assignResult",
+      "Next": "CheckDriverAssigned"
+    },
+    "CheckDriverAssigned": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.assignResult.driverAssigned",
+          "BooleanEquals": true,
+          "Next": "UpdateOrderWithDriver"
+        }
+      ],
+      "Default": "WaitAndRetry"
+    },
+    "UpdateOrderWithDriver": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:085179068256:function:UpdateOrderWithDriver",
+      "End": true
+    },
+    "WaitAndRetry": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "AssignDriver"
+    }
+  }
+}

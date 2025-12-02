@@ -7,7 +7,7 @@ const { getUserFromEvent, validateAccess } = require('../../shared/auth/jwt-util
 const { getItem, updateItem } = require('../../shared/database/dynamodb-client');
 const { publishEvent } = require('../../shared/utils/eventbridge-client');
 const { USER_ROLES } = require('../../shared/constants/user-roles');
-const { success, notFound, badRequest, serverError } = require('../../shared/utils/response');
+const { success, error, forbidden } = require('../../shared/utils/response');
 
 const ORDERS_TABLE = process.env.ORDERS_TABLE;
 
@@ -16,36 +16,27 @@ module.exports.handler = async (event) => {
     const user = getUserFromEvent(event);
     validateAccess(user, [USER_ROLES.CHEF_EJECUTIVO]);
     
-    const orderId = event.pathParameters.orderId;
+    const { orderId } = event.pathParameters;
     const body = JSON.parse(event.body);
-    
-    if (!body.chefId) {
-      return badRequest('chefId requerido');
-    }
-    
+    const { chefId } = body;
+    if (!chefId) return error('chefId requerido');
     const order = await getItem(ORDERS_TABLE, { orderId });
-    
-    if (!order) {
-      return notFound('Orden no encontrada');
-    }
-    
-    const updated = await updateItem(
+    if (!order) return error('Orden no encontrada');
+    await updateItem(
       ORDERS_TABLE,
       { orderId },
-      'SET #status = :status, assignedChefId = :chefId, updatedAt = :updatedAt',
+      'SET assignedChef = :chefId, status = :cooking, updatedAt = :updatedAt',
       {
-        ':status': 'COOKING',
-        ':chefId': body.chefId,
+        ':chefId': chefId,
+        ':cooking': 'COOKING',
         ':updatedAt': new Date().toISOString()
-      },
-      { '#status': 'status' }
+      }
     );
+    await publishEvent('OrderAssigned', { orderId, chefId }, 'fridays.kitchen');
     
-    await publishEvent('OrderAssigned', { orderId, chefId: body.chefId }, 'fridays.kitchen');
-    
-    return success({ order: updated });
-  } catch (error) {
-    console.error('❌ Error:', error);
-    return serverError('Error al asignar orden', error);
+    return success({ message: 'Orden asignada al chef', chefId });
+  } catch (err) {
+    console.error('Error:', err);
+    return error('Error al asignar la orden');
   }
 };

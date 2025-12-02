@@ -27,9 +27,9 @@ module.exports.handler = async (event) => {
     const body = event.body ? JSON.parse(event.body) : event;
 
     // Validar campos requeridos
-    validateRequiredFields(body, ['email', 'password', 'firstName', 'lastName']);
+    validateRequiredFields(body, ['email', 'password', 'firstName', 'lastName', 'role']);
 
-    const { email, password, firstName, lastName, phoneNumber, address } = body;
+    const { email, password, firstName, lastName, phoneNumber, address, role, vehicleType, tenant_id } = body;
 
     // Validar email
     if (!validateEmail(email)) {
@@ -68,14 +68,44 @@ module.exports.handler = async (event) => {
       lastName,
       phoneNumber: phoneNumber || null,
       address: address || null,
-      role: USER_ROLES.CLIENTE, // Por defecto, cliente
-      // tenant_id: NO se incluye para clientes (no usan multi-tenancy)
+      role: role || USER_ROLES.CLIENTE,
+      tenant_id: tenant_id || null,
       status: 'ACTIVE',
       createdAt: timestamp,
       updatedAt: timestamp
     };
 
     await putItem(USERS_TABLE, newUser);
+
+    // Si el rol es REPARTIDOR, crear también en la tabla de drivers
+    if (role === USER_ROLES.REPARTIDOR) {
+      const DRIVERS_TABLE = process.env.DRIVERS_TABLE;
+      const driver = {
+        driverId: uuidv4(),
+        userId,
+        name: `${firstName} ${lastName}`,
+        vehicleType: vehicleType || 'moto',
+        tenant_id: tenant_id || null,
+        isAvailable: true,
+        currentDeliveries: 0,
+        createdAt: timestamp
+      };
+      await putItem(DRIVERS_TABLE, driver);
+    }
+
+    // Si el rol es CHEF_EJECUTIVO o COCINERO, crear también en la tabla de chefs
+    if (role === USER_ROLES.CHEF_EJECUTIVO || role === USER_ROLES.COCINERO) {
+      const CHEFS_TABLE = process.env.CHEFS_TABLE;
+      const chef = {
+        chefId: uuidv4(),
+        userId,
+        name: `${firstName} ${lastName}`,
+        tenant_id: tenant_id || null,
+        isAvailable: true,
+        currentOrders: 0,
+        createdAt: timestamp
+      };
+    }
 
     console.log(`✅ Usuario registrado: ${userId}`);
 

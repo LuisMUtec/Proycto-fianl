@@ -1,0 +1,493 @@
+{
+	"info": {
+		"_postman_id": "ecbda584-f808-4152-bbac-78dad82bf979",
+		"name": "Fridays Perú - Admin Service",
+		"description": "Colección para el servicio de Administración\n\nIncluye:\n- DASHBOARD (métricas y KPIs)\n- USERS (gestión usuarios)\n- SEDES (sucursales)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43541521"
+	},
+	"item": [
+		{
+			"name": "📊 DASHBOARD",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTc3MzYsImV4cCI6MTc2NDUwNDEzNn0.05ZtozwVpSFURYnJ7fG_iDxCeulptEZRWBqfGrIaj0Y",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard"
+							]
+						},
+						"description": "Métricas generales del día"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders Today",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/today/TENANT#003",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"today",
+								"TENANT"
+							],
+							"hash": "003"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sales Metrics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/metrics/sales?startDate=2024-01-01&endDate=2024-12-31",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"metrics",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Performance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTY5MDIsImV4cCI6MTc2NDUwMzMwMn0.FYx5eWzPjw5zYuawYGOuXTruSF5i6T-fF7s6O--pKZM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/metrics/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"metrics",
+								"products"
+							]
+						},
+						"description": "Productos más vendidos"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👥 USERS",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxZDExZDA5Yy05Nzc2LTQ4OWItYjc3OS00ZjIwYTdmYzlhOTgiLCJlbWFpbCI6ImFkbWluQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDEiLCJpYXQiOjE3NjQ0NjA3NzQsImV4cCI6MTc2NDU0NzE3NH0.km1NIJWaupuDSlFOeEwUcI5kVYzBdcsiIChEnOrgwVc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cheff101@fridays.pe\",\n  \"password\": \"Todos123\",\n  \"name\": \"Alexia Montalban\",\n  \"role\": \"Cheff ejecutivo\",\n  \"address\": \"Calle 111\",\n  \"phoneNumber\": \"+51928745678\",\n  \"tenant_id\": \"TENANT#001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTYyMjQsImV4cCI6MTc2NDUwMjYyNH0.6050yUKaniznveRSFEVRnRYY5BxyWovmxKOTzzEYRSg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTYwNzksImV4cCI6MTc2NDUwMjQ3OX0.eeY2IK_TdyqWMEmzwnqSIsXOaUaWpAoNy4bdobr6rdA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/cb386dc3-cf93-44e1-a29a-400aa43bd1e0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"cb386dc3-cf93-44e1-a29a-400aa43bd1e0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTYyMjQsImV4cCI6MTc2NDUwMjYyNH0.6050yUKaniznveRSFEVRnRYY5BxyWovmxKOTzzEYRSg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Carlos Eduardo\",\n  \"lastName\": \"Mendoza García\",\n  \"password\": \"Todos1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/0122b53b-5fd9-457b-988d-72c08a0856d9",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"0122b53b-5fd9-457b-988d-72c08a0856d9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/user_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"user_123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change User Role",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"Cocinero\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/user_123/role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"user_123",
+								"role"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🏢 SEDES",
+			"item": [
+				{
+					"name": "Create Sede",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tenant_id\": \"TENANT#004\",\n  \"name\": \"Fridays La Molina\",\n  \"district\": \"La Molina\",\n  \"address\": \"Av. Javier Prado Este 2000\",\n  \"phone\": \"+51987654324\",\n  \"email\": \"lamolina@fridays.pe\",\n  \"latitude\": -12.0824,\n  \"longitude\": -76.9472\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sedes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sedes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Sedes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sedes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sedes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sede",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sedes/TENANT%23004",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sedes",
+								"TENANT%23004"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sede",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMTIyYjUzYi01ZmQ5LTQ1N2ItOTg4ZC03MmMwOGEwODU2ZDkiLCJlbWFpbCI6ImFkbWluMDAzQGZyaWRheXMucGUiLCJyb2xlIjoiQWRtaW4gU2VkZSIsInRlbmFudF9pZCI6IlRFTkFOVCMwMDMiLCJpYXQiOjE3NjQ0MTcyMDgsImV4cCI6MTc2NDUwMzYwOH0.PO3xG0dr-cwYsUEXUgn7f_hx7D7cyV4GulQL4gwgRlo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Fridays San Isidro Premium\",\n  \"district\": \"San Isidro\",\n  \"address\": \"Av. Conquistadores 888 - Centro Financiero\",\n  \"phone\": \"+51987654321\",\n  \"email\": \"sanisidro@fridays.pe\",\n  \"latitude\": -12.0897,\n  \"longitude\": -77.0352,\n  \"status\": \"ACTIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sedes/TENANT23003",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sedes",
+								"TENANT23003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Sede",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/sedes/sede_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sedes",
+								"sede_123"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://YOUR-ADMIN-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

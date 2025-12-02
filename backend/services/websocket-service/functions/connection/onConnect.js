@@ -19,10 +19,12 @@ module.exports.handler = async (event) => {
     
     const decoded = await verifyToken(token);
     
+    // Si el usuario no tiene tenant_id (es cliente), guardar 'cliente' como string
+    const tenant_id = decoded.tenant_id ? decoded.tenant_id : 'cliente';
     await putItem(WS_CONNECTIONS_TABLE, {
       connectionId,
       userId: decoded.userId,
-      tenant_id: decoded.tenant_id || null,
+      tenant_id,
       connectedAt: new Date().toISOString()
     });
     

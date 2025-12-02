@@ -43,59 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role?: string;
     address?: string;
   }) => {
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${AUTH_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName || '',
-          phoneNumber: data.phoneNumber || '',
-          address: data.address || '',
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || result.message || 'Error al registrar usuario');
-      }
-
-      // El backend devuelve token y user directamente
-      if (result.token) {
-        localStorage.setItem('auth_token', result.token);
-      }
-
-      // Normalizar campos de usuario del backend
-      const userFromServer = result.user || {};
-      const userProfile: UserProfile = {
-        id: userFromServer.userId || userFromServer.id,
-        nombre: userFromServer.firstName || userFromServer.nombre || userFromServer.name,
-        apellido: userFromServer.lastName || userFromServer.apellido || '',
-        correo_electronico: userFromServer.email || userFromServer.correo_electronico,
-        celular: userFromServer.phoneNumber || userFromServer.celular || userFromServer.phone || '',
-        role: (userFromServer.role || userFromServer.rol || 'USER').toUpperCase(),
-        activo: userFromServer.status === 'ACTIVE' ? true : (userFromServer.active ?? userFromServer.activo ?? true),
-        created_at: userFromServer.createdAt || userFromServer.created_at || new Date().toISOString(),
-      };
-
-      localStorage.setItem('user_profile', JSON.stringify(userProfile));
-      setUser(userProfile);
-      setProfile(userProfile);
-
-      return { error: null };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      return { error: error as Error };
-    } finally {
-      setLoading(false);
-    }
+    // Registro no disponible en la aplicación administrativa.
+    // Dejamos una función stub para no romper consumos existentes desde componentes.
+    setLoading(false);
+    return { error: new Error('Registro no disponible') };
   };
 
   const signIn = async (credentials: {
@@ -115,38 +66,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password: credentials.password,
         }),
       });
-
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || result.message || 'Credenciales inválidas');
+        throw new Error(result.error || result.message || result?.data?.message || 'Credenciales inválidas');
       }
 
-      // Guardar token y perfil
-      if (result.token) {
-        localStorage.setItem('auth_token', result.token);
-      }
+      // Extraer payload flexible: muchas respuestas actuales vienen en { data: { user, token } }
+      const payload = result?.data ?? result;
 
-      // Normalizar campos de usuario del backend
-      const userFromServer = result.user || {};
-      const userRole = (userFromServer.role || userFromServer.rol || 'USER').toUpperCase();
-      
-      // Validar que solo staff (ADMIN, COOK, DISPATCHER) pueda acceder a la app administrativa
-      const allowedRoles = ['ADMIN', 'COOK', 'DISPATCHER'];
-      if (!allowedRoles.includes(userRole)) {
+      // token puede estar en payload.token o en result.token
+      const token = payload?.token || result?.token;
+      if (token) localStorage.setItem('auth_token', token);
+
+      // usuario puede estar en payload.user o result.user
+      const userFromServer = payload?.user || result?.user || {};
+
+      // Normalizar tenant id: tenant_id (snake_case) -> tenantId
+      const tenantId = (userFromServer.tenantId || userFromServer.tenant_id || null) as string | null;
+
+      // Normalizar role: mapear varios labels del backend a roles canónicos usados por la UI
+      const rawRole = (userFromServer.role || userFromServer.rol || '').toString();
+
+      const normalizeRole = (r: string) => {
+        const low = r.toLowerCase().trim();
+        // Exact matches for known backend role strings
+        if (low === 'admin sede' || /admin/i.test(r) || /administrador/i.test(low)) return 'ADMIN';
+        if (low === 'cheff ejecutivo' || /chef|cheff|cocinero|cocin/i.test(low)) return 'COOK';
+        if (low === 'empacador' || low === 'repartidor' || /reparti|dispatch|despatc|empaca|empaqueta|empacador/i.test(low)) return 'DISPATCHER';
+        if (/cliente|user|usuario/i.test(low)) return 'USER';
+        return r.toUpperCase();
+      };
+
+      const canonicalRole = normalizeRole(rawRole);
+
+      // Rechazar acceso a usuarios tipo Cliente
+      if (canonicalRole === 'USER') {
         throw new Error('No tienes permisos para acceder a esta aplicación. Esta es solo para personal administrativo.');
       }
 
+
       const userProfile: UserProfile = {
-        id: userFromServer.userId || userFromServer.id,
-        nombre: userFromServer.firstName || userFromServer.nombre || userFromServer.name,
-        apellido: userFromServer.lastName || userFromServer.apellido || '',
-        correo_electronico: userFromServer.email || userFromServer.correo_electronico,
-        celular: userFromServer.phoneNumber || userFromServer.celular || userFromServer.phone || '',
-        role: userRole,
-        activo: userFromServer.status === 'ACTIVE' ? true : (userFromServer.active ?? userFromServer.activo ?? true),
-        created_at: userFromServer.createdAt || userFromServer.created_at || new Date().toISOString(),
-      };
+        // canonical
+        userId: userFromServer.userId || userFromServer.id || '',
+        id: userFromServer.id || userFromServer.userId || undefined,
+        email: userFromServer.email || userFromServer.correo_electronico || '',
+        firstName: userFromServer.firstName || userFromServer.first_name || userFromServer.nombre || '',
+        lastName: userFromServer.lastName || userFromServer.last_name || userFromServer.apellido || '',
+        phoneNumber: userFromServer.phoneNumber || userFromServer.phone || userFromServer.celular || '',
+        address: userFromServer.address || userFromServer.direccion || undefined,
+        role: canonicalRole || '',
+        tenantId: tenantId || undefined,
+        tenant_id: (userFromServer.tenant_id || undefined) as string | undefined,
+        status: userFromServer.status || undefined,
+        active: userFromServer.status ? (userFromServer.status === 'ACTIVE') : (userFromServer.active ?? true),
+        createdAt: userFromServer.createdAt || userFromServer.created_at || new Date().toISOString(),
+        updatedAt: userFromServer.updatedAt || userFromServer.updated_at || new Date().toISOString(),
+
+        // legacy Spanish fields for compatibility
+        nombre: userFromServer.firstName || userFromServer.first_name || userFromServer.nombre || undefined,
+        apellido: userFromServer.lastName || userFromServer.last_name || userFromServer.apellido || undefined,
+        correo_electronico: userFromServer.email || userFromServer.correo_electronico || undefined,
+        celular: userFromServer.phoneNumber || userFromServer.phone || userFromServer.celular || undefined,
+        sede_id: userFromServer.sede_id || undefined,
+        activo: userFromServer.status ? (userFromServer.status === 'ACTIVE') : (userFromServer.active ?? true),
+      } as UserProfile;
 
       localStorage.setItem('user_profile', JSON.stringify(userProfile));
       setUser(userProfile);

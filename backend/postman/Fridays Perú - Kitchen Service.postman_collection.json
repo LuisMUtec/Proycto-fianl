@@ -1,0 +1,243 @@
+{
+	"info": {
+		"_postman_id": "f0686bc9-a2e9-48b9-ab51-092f8de29ebd",
+		"name": "Fridays Perú - Kitchen Service",
+		"description": "Colección para el servicio de Cocina\n\nIncluye:\n- ORDERS (órdenes pendientes, actualizar status)\n- CHEFS (CRUD de chefs)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43541521"
+	},
+	"item": [
+		{
+			"name": "📋 ORDERS",
+			"item": [
+				{
+					"name": "Get Pending Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"pending"
+							]
+						},
+						"description": "Ver órdenes pendientes en cocina"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"PREPARING\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"ord_123",
+								"status"
+							]
+						},
+						"description": "Estados: PREPARING, READY, COMPLETED"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"ord_123"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👨‍🍳 CHEFS",
+			"item": [
+				{
+					"name": "Create Chef",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Carlos Pérez\",\n  \"email\": \"carlos@fridays.pe\",\n  \"specialty\": \"Parrilla\",\n  \"sedeId\": \"sede_lima\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chefs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chefs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Chefs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chefs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chefs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chef",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chefs/chef_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chefs",
+								"chef_123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Chef",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specialty\": \"Cocina Internacional\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chefs/chef_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chefs",
+								"chef_123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Chef",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/chefs/chef_123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chefs",
+								"chef_123"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Chef to Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chefId\": \"chef_123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/ord_123/assign-chef",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"ord_123",
+								"assign-chef"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://YOUR-KITCHEN-API-ID.execute-api.us-east-1.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

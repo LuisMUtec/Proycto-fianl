@@ -65,11 +65,27 @@
         },
         {
           "method": "POST",
-          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/sync"
+          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/validate"
+        },
+        {
+          "method": "POST",
+          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart"
+        },
+        {
+          "method": "GET",
+          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart"
         },
         {
           "method": "DELETE",
           "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart"
+        },
+        {
+          "method": "PUT",
+          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart"
+        },
+        {
+          "method": "DELETE",
+          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/cart/item/{productId}"
         },
         {
           "method": "POST",
@@ -96,10 +112,6 @@
           "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/menu/productos/{productId}"
         },
         {
-          "method": "PUT",
-          "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}"
-        },
-        {
           "method": "DELETE",
           "url": "https://rpepuemxp5.execute-api.us-east-1.amazonaws.com/dev/orders/{orderId}"
         }
@@ -110,47 +122,11 @@
       "endpoints": [
         {
           "method": "GET",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/created"
-        },
-        {
-          "method": "POST",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/assign"
-        },
-        {
-          "method": "PUT",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}"
-        },
-        {
-          "method": "POST",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/ready"
-        },
-        {
-          "method": "GET",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs"
-        },
-        {
-          "method": "POST",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs"
-        },
-        {
-          "method": "POST",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders"
-        },
-        {
-          "method": "GET",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders"
-        },
-        {
-          "method": "GET",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}"
-        },
-        {
-          "method": "PUT",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/status"
-        },
-        {
-          "method": "GET",
           "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/{chefId}"
+        },
+        {
+          "method": "GET",
+          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs"
         },
         {
           "method": "PUT",
@@ -162,7 +138,19 @@
         },
         {
           "method": "POST",
-          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/chefs/seed"
+          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}/assign"
+        },
+        {
+          "method": "GET",
+          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/created"
+        },
+        {
+          "method": "GET",
+          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders/{orderId}"
+        },
+        {
+          "method": "GET",
+          "url": "https://9gxi9k52k6.execute-api.us-east-1.amazonaws.com/dev/kitchen/orders"
         }
       ]
     },
@@ -171,59 +159,43 @@
       "endpoints": [
         {
           "method": "GET",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/available"
+          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}"
         },
         {
           "method": "GET",
           "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers"
         },
         {
-          "method": "POST",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers"
+          "method": "GET",
+          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/available"
         },
         {
           "method": "POST",
           "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/assign"
         },
         {
-          "method": "PUT",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/status"
+          "method": "GET",
+          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders"
+        },
+        {
+          "method": "GET",
+          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}"
+        },
+        {
+          "method": "DELETE",
+          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}"
         },
         {
           "method": "GET",
           "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}/tracking"
         },
         {
-          "method": "POST",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders"
-        },
-        {
-          "method": "GET",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}"
-        },
-        {
-          "method": "GET",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders"
-        },
-        {
-          "method": "DELETE",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/orders/{orderId}"
-        },
-        {
-          "method": "GET",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}"
-        },
-        {
           "method": "PUT",
           "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}"
         },
         {
           "method": "DELETE",
           "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/{driverId}"
-        },
-        {
-          "method": "POST",
-          "url": "https://y8b94sjrcc.execute-api.us-east-1.amazonaws.com/dev/delivery/drivers/seed"
         }
       ]
     },
@@ -297,40 +269,28 @@
         {
           "method": "DELETE",
           "url": "https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/products/{productId}"
-        },
-        {
-          "method": "GET",
-          "url": "https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/kitchen/metrics"
-        },
-        {
-          "method": "GET",
-          "url": "https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/finances/daily"
-        },
-        {
-          "method": "GET",
-          "url": "https://6gce47hxc2.execute-api.us-east-1.amazonaws.com/dev/admin/finances/monthly"
         }
       ]
     },
     "websocket-service": {
-      "baseUrl": "https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev",
-      "wsUrl": "wss://9bymcj94u7.execute-api.us-east-1.amazonaws.com/dev",
+      "baseUrl": "https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev",
+      "wsUrl": "wss://m4mwqz1lm5.execute-api.us-east-1.amazonaws.com/dev",
       "endpoints": [
         {
           "method": "POST",
-          "url": "https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/notify"
+          "url": "https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/notify"
         },
         {
           "method": "GET",
-          "url": "https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections"
+          "url": "https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections"
         },
         {
           "method": "GET",
-          "url": "https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}"
+          "url": "https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}"
         },
         {
           "method": "DELETE",
-          "url": "https://yec3fbj985.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}"
+          "url": "https://9ag2cmvc8i.execute-api.us-east-1.amazonaws.com/dev/ws/connections/{connectionId}"
         }
       ]
     },

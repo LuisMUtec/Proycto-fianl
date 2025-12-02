@@ -162,8 +162,9 @@ function getCustomerMessage(status) {
   const messages = {
     'CREATED': '¡Orden recibida! Estamos preparando tu pedido.',
     'COOKING': '🍳 Tu pedido está siendo preparado por nuestro chef.',
+    'PACKING': '📦 Tu pedido está siendo empacado para entrega.',
     'READY': '✅ ¡Tu pedido está listo! El repartidor lo recogerá pronto.',
-    'DELIVERING': '🚚 ¡Tu pedido está en camino! El repartidor llegará pronto.',
+  'DELIVERING': '🏍️ ¡Tu pedido está en camino! El repartidor llegará pronto.',
     'DELIVERED': '🎉 ¡Pedido entregado! Disfruta tu comida.',
     'CANCELLED': '❌ Tu orden ha sido cancelada.'
   };
@@ -175,10 +176,11 @@ function getCustomerMessage(status) {
  */
 function getStaffMessage(status, role) {
   const messages = {
-    'CREATED': '📦 Nueva orden recibida - Requiere asignación',
+    'CREATED': '👨‍🍳 Nueva orden recibida - Requiere asignación',
     'COOKING': '🍳 Orden en preparación',
+    'PACKING': '📦 Orden en empaque',
     'READY': '✅ Orden lista - Asignar repartidor',
-    'DELIVERING': '🚚 Orden en ruta de entrega',
+    'DELIVERING': '🏍️  Orden en ruta de entrega',
     'DELIVERED': '✨ Orden completada',
     'CANCELLED': '❌ Orden cancelada'
   };
@@ -203,6 +205,13 @@ function getHandlerInfo(status, updatedBy, driverInfo) {
       role: 'Repartidor'
     };
   }
+  if (status === 'PACKING' && updatedBy) {
+  return {
+    stage: 'Empaque',
+    handler: updatedBy.email || 'Empacador',
+    role: updatedBy.role || 'Empacador'
+  };
+}
   if (status === 'READY') {
     return {
       stage: 'Lista para entrega',

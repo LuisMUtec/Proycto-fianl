@@ -8,7 +8,7 @@ const { query } = require('../../shared/database/dynamodb-client');
 const { USER_ROLES } = require('../../shared/constants/user-roles');
 const { success, forbidden, serverError } = require('../../shared/utils/response');
 
-const CHEFS_TABLE = process.env.CHEFS_TABLE;
+const USERS_TABLE = process.env.USERS_TABLE;
 
 module.exports.handler = async (event) => {
   try {
@@ -20,10 +20,12 @@ module.exports.handler = async (event) => {
     }
     
     const chefs = await query(
-      CHEFS_TABLE,
-      'tenant_id = :tenant_id',
-      { ':tenant_id': user.tenant_id },
-      'tenant-index'
+      USERS_TABLE,
+      'tenant_id = :tenant_id AND #role = :role',
+      { ':tenant_id': user.tenant_id, ':role': USER_ROLES.CHEF_EJECUTIVO },
+      'tenant-index',
+      null,
+      { '#role': 'role' }
     );
     
     return success({ chefs });

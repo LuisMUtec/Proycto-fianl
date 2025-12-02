@@ -4,11 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Alert from '../ui/Alert';
 
-interface LoginFormProps {
-  onSwitchToRegister?: () => void;
-}
-
-export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -29,9 +25,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
       if (result?.error) throw result.error;
 
-      // Redirigir al dashboard (ruta raíz)
+      // Redirigir al dashboard
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 100);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Error en autenticación';
@@ -94,20 +90,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         {loading ? 'Procesando...' : 'Iniciar Sesión'}
       </button>
 
-      {onSwitchToRegister && (
-        <div className="text-center mt-4">
-          <p className="text-sm text-gray-600">
-            ¿No tienes cuenta?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToRegister}
-              className="text-red-600 hover:text-red-700 font-medium"
-            >
-              Regístrate aquí
-            </button>
-          </p>
-        </div>
-      )}
+      {/* Registro deshabilitado en frontend-admin */}
     </form>
   );
 }
