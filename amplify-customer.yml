@@ -1,0 +1,17 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend-customer
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: frontend-customer/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend-customer/node_modules/**/*
